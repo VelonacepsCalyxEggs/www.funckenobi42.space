@@ -108,7 +108,12 @@ def writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft):
 
 # this function is responsible for playing the music.
 def Player():
-     conn = psycopg2.connect(dbname="MainDB", user="postgres", password="111LZo0l4S7dzO0PXA3KOkasw2rcMtO46hY2FbUPxS", host="192.168.0.50", port="54320")
+     try:
+          conn = psycopg2.connect(**configus2)
+          print("Connection successful!")
+     except psycopg2.Error as e:
+          print(f"Error connecting to the database: {e}")
+          return
      cur = conn.cursor()
      cur.execute('SELECT max(id) FROM music')
      maxQueueNumber = cur.fetchall()[0][0]
