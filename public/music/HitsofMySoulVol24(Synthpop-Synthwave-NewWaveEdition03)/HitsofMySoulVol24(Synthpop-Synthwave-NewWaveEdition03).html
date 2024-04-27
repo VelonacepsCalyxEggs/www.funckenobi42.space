@@ -1,0 +1,148 @@
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252" style="font-family: century-gothic, sans-serif;">
+    <head>
+        <title>Main Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://use.typekit.net/oov2wcw.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io-client.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+        <style>
+.nav-link {
+            color: gold;
+            }
+            .nav-link:link {
+            color: gold;
+            }
+            .nav-link:hover {
+            color: orange;
+            }
+            .nav-link:active {
+            color: orangered;
+            }
+            .navbar-brand {
+                color:orangered
+            }
+            .dropdown-item {
+                background-color: gold;
+            }
+            canvas {
+            width: inherit;
+            height: inherit;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -9999;
+            }
+            body {
+                font-size: 2rem;
+                height: 100%;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+    flex-wrap: nowrap;
+            }
+            .navbar-toggler {
+              background-color: yellow;
+            }
+            .row {
+              width: inherit;
+            }
+
+.song-info {
+  flex: 1;
+}
+
+.song-title {
+  font-size: 1.2rem; /* Base font size */
+  font-family: sans-serif; /* Specify desired font family */
+}
+
+.button-container {
+  text-align: right;
+}
+
+.add-to-queue {
+  font-size: 1rem; /* Base font size */
+  font-family: sans-serif; /* Specify desired font family */
+  padding: 0.5rem 1rem; /* Adjust padding as needed */
+  border: 1px solid #ddd; /* Set border style */
+  background-color: #f2f2f2; /* Set background color */
+  cursor: pointer; /* Indicate interaction */
+}
+
+/* Adapt font size to screen size (media queries) */
+
+@media (max-width: 768px) {
+  .song-title {
+    font-size: 1rem;
+  }
+  .add-to-queue {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .song-title {
+    font-size: 0.8rem;
+  }
+  .add-to-queue {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+        </style>
+      <body style="background-color: black;">
+        <canvas id="canvas" style="width: inherit; height: inherit;"></canvas>
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgb(42, 42, 42);">
+            <div class="container-fluid">
+            <a class="navbar-brand" href="#" style="font-size: 2rem;">42</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" style="font-weight: bold;" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/radio">Radio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/files">Files</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/logout">Logout</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Dropdown link
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink" style="background-color: rgb(42, 42, 42);">
+                    <li><a class="dropdown-item" href="/profile/">Profile</a></li>
+                    <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                    </ul>
+                </li>
+                </ul>
+                <div><p class="h3" style="color: gold;">Welcome !</p><span class='h6 text-light rounded' style='display: flex; width: auto; height: auto; text-align: center; justify-content: center; background-color: lightseagreen'></span></div>
+            </div>
+            </div>
+        </nav> 
+        <div class="container-fluid" style="height: fit-content; width: 25em; display: flex;">
+          <div class="container-fluid" style="background-color: gray;display: flex;flex-wrap: wrap;justify-content: flex-start;flex-direction: column;align-items: flex-start;align-content: stretch;">
+                <div><a class="nav-link" href=""><h3>Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</h3></a></div>
+                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1476 - Vhsailing Rally By Riverwave 川の波 From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1476">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1477 - Under the Same Skies By Medsound feat. Magnus From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1477">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1478 - Moon Runner By Dance With The Dead From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1478">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1479 - Tonight By Timecop1983 feat. BackInTheFuture From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1479">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1480 - Hologram Rose By Jordan F From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1480">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1481 - Sunset By The Midnight From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1481">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1482 - Oceanic (Outro) By Betamaxx From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1482">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1483 - Traces By Let Em Riot From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1483">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1484 - Nights By Action Jackson From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1484">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1485 - Girlfriend By Trevor Something From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1485">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1486 - Everything By FM-84 From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1486">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1487 - Sundriped By Com Truise From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1487">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1488 - Heart of Wax By Echosoft From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1488">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1489 - Turn Back Time By Michael Oakley From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1489">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1490 - She's A Glitch By Mega Drive From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1490">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1491 - Hard Wired By Perturbator feat. Memory Ghost's Isabella Goloversic From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1491">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1492 - Game over By 20SIX Hundred From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1492">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1493 - Fire (Digimax Italo Fever Remix) (Alternate Intro Mix) By Rosette From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1493">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1494 - Nostalgia By EX-MACHINA From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1494">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1495 - Closer By Timecop1983 From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1495">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1496 - Defense By Oscillian From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1496">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1497 - Dead End By Neon Nox From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1497">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1498 - Shadow (Last Dance of The Night Club Edit) By Chromatics From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1498">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1499 - U&I (Dream Fiend Remix) By nanobii From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1499">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1500 - Friendship Bracelets By Mattzart From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1500">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1501 - Space Romance By Jordan F From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1501">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1502 - Another Story By Electric Youth From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1502">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1503 - Desert King By Lghtnng From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1503">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1504 - Night Wolves By D-Noise From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1504">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1505 - The Way I Could (Emil Rottmayer Remix) By She's Not Real From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1505">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1506 - Forever By ORAX From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1506">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1507 - Miami Nights By Trevor Something From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1507">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1508 - Heading South By Mitch Murder From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1508">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1509 - Let's Talk By FM-84 ft. Timecop1983 ft. Josh Dally From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1509">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1510 - Same Different World (Original Mix) By VHS Glitch From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1510">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1511 - The Revenge By Action Jackson From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1511">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1512 - So Real (Original Mix) By Silent Gloves feat. Patrick Baker From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1512">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1513 - Sunset Cruise By Miami Nights 1984 From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1513">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1514 - Dreams By Timecop1983 feat. Dana Jean Phoenix From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1514">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1515 - Disassembly By New Shack From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1515">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1516 - Temptations By Lost Years From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1516">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1517 - Solidus (Extended Mix) By Fehrplay feat. Richard Knott From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1517">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1518 - Beyond Memory By Nina From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1518">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1519 - Foxy By Nightfox From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1519">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1520 - Venice Beach By Futurecop! From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1520">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1521 - New Horizons By Betamaxx From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1521">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1522 - Vortex By STARFORCE feat. Cougar Synth From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1522">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1523 - Radio signal By Waveshaper From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1523">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1524 - The Equaliser (Not Alone) By The Midnight From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1524">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">1525 - Eternal Summer By Fast Eyes From Hits of My Soul Vol. 24 (Synthpop - Synthwave - New Wave Edition 03)</span>                </div>                <div class="button-container">                    <button class="queueButton" value="1525">Add to queue</button>                </div>                </div>                
+          </div>
+      </div>
+      </body>
+      <script src="static/animation.js"></script>
+      <script src="static/queueeditorsocket.js"></script>
+      
+    </head>
+  </html>

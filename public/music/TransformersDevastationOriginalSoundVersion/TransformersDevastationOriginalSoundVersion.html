@@ -1,0 +1,148 @@
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252" style="font-family: century-gothic, sans-serif;">
+    <head>
+        <title>Main Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://use.typekit.net/oov2wcw.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io-client.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+        <style>
+.nav-link {
+            color: gold;
+            }
+            .nav-link:link {
+            color: gold;
+            }
+            .nav-link:hover {
+            color: orange;
+            }
+            .nav-link:active {
+            color: orangered;
+            }
+            .navbar-brand {
+                color:orangered
+            }
+            .dropdown-item {
+                background-color: gold;
+            }
+            canvas {
+            width: inherit;
+            height: inherit;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -9999;
+            }
+            body {
+                font-size: 2rem;
+                height: 100%;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+    flex-wrap: nowrap;
+            }
+            .navbar-toggler {
+              background-color: yellow;
+            }
+            .row {
+              width: inherit;
+            }
+
+.song-info {
+  flex: 1;
+}
+
+.song-title {
+  font-size: 1.2rem; /* Base font size */
+  font-family: sans-serif; /* Specify desired font family */
+}
+
+.button-container {
+  text-align: right;
+}
+
+.add-to-queue {
+  font-size: 1rem; /* Base font size */
+  font-family: sans-serif; /* Specify desired font family */
+  padding: 0.5rem 1rem; /* Adjust padding as needed */
+  border: 1px solid #ddd; /* Set border style */
+  background-color: #f2f2f2; /* Set background color */
+  cursor: pointer; /* Indicate interaction */
+}
+
+/* Adapt font size to screen size (media queries) */
+
+@media (max-width: 768px) {
+  .song-title {
+    font-size: 1rem;
+  }
+  .add-to-queue {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .song-title {
+    font-size: 0.8rem;
+  }
+  .add-to-queue {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+        </style>
+      <body style="background-color: black;">
+        <canvas id="canvas" style="width: inherit; height: inherit;"></canvas>
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgb(42, 42, 42);">
+            <div class="container-fluid">
+            <a class="navbar-brand" href="#" style="font-size: 2rem;">42</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" style="font-weight: bold;" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/radio">Radio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/files">Files</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/logout">Logout</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Dropdown link
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink" style="background-color: rgb(42, 42, 42);">
+                    <li><a class="dropdown-item" href="/profile/">Profile</a></li>
+                    <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                    </ul>
+                </li>
+                </ul>
+                <div><p class="h3" style="color: gold;">Welcome !</p><span class='h6 text-light rounded' style='display: flex; width: auto; height: auto; text-align: center; justify-content: center; background-color: lightseagreen'></span></div>
+            </div>
+            </div>
+        </nav> 
+        <div class="container-fluid" style="height: fit-content; width: 25em; display: flex;">
+          <div class="container-fluid" style="background-color: gray;display: flex;flex-wrap: wrap;justify-content: flex-start;flex-direction: column;align-items: flex-start;align-content: stretch;">
+                <div><a class="nav-link" href=""><h3>Transformers Devastation: Original Sound Version</h3></a></div>
+                                <div class="song-container">                <div class="song-info">                    <span class="song-title">26 - Transformers Devastation By Vince Dicola Kenny Meriedeth From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="26">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">27 - Title By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="27">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">28 - Autobots' Theme By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="28">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">29 - City of Steel - Day By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="29">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">30 - Decepticon By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="30">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">31 - Decepticon Sergeant By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="31">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">32 - Steel Tower By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="32">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">33 - Constructicon/Sentry Bot By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="33">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">34 - Devastator By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="34">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">35 - Ferrotaxis By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="35">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">36 - The Proudstar By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="36">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">37 - Insecticon By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="37">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">38 - Plasma Core By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="38">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">39 - City of Steel - Dusk By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="39">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">40 - Chase By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="40">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">41 - Blitzwing By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="41">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">42 - Motormaster By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="42">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">43 - City of Steel - Storm By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="43">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">44 - Protect Mission By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="44">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">45 - Menosaur By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="45">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">46 - Starscream By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="46">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">47 - Cybertron By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="47">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">48 - Shockwave By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="48">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">49 - Planet Cyberformation By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="49">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">50 - Escape By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="50">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">51 - The Proudstar - Security System By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="51">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">52 - Cargo Lift By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="52">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">53 - Soundwave By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="53">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">54 - The Proudstar - Legacy By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="54">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">55 - Confrontation By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="55">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">56 - Megatron By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="56">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">57 - Final Battle By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="57">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">58 - Ending By Satoshi Igarashi Tetsuya Shibata Jun Okubo Naofumi Harada From Transformers Devastation: Original Sound Version</span>                </div>                <div class="button-container">                    <button class="queueButton" value="58">Add to queue</button>                </div>                </div>                
+          </div>
+      </div>
+      </body>
+      <script src="static/animation.js"></script>
+      <script src="static/queueeditorsocket.js"></script>
+      
+    </head>
+  </html>

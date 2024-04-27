@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="login page">
+    <meta name="author" content="func_kenobi">
+    <script src="http://www.funckenobi42.space/scripts/notificationHandler.js"></script>
+    <link rel="icon" href="/favicon.ico">
+
+    <title>Login</title>
+
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/signin.css" rel="stylesheet">
+  </head>
+
+  <body class="text-center">
+    <div b-mqsyp6eh3o="" id="parallax_layer1" class="fancy_parallax_layer1" style="animation-name: loop_E; animation-duration: 80s;"></div>
+    <div b-mqsyp6eh3o="" id="parallax_layer2" class="fancy_parallax_layer2" style="animation-name: loop_E; animation-duration: 40s;"></div>
+    <div b-mqsyp6eh3o="" id="parallax_layer3" class="fancy_parallax_layer3" style="animation-name: loop_E; animation-duration: 20s;"></div>
+    <body class="text-center">
+      <div class="modal" tabindex="-1" id="errorModal" style="display: none;">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Notification</h5>
+            </div>
+            <div class="modal-body">
+              <div id="errorMessage" class="alert alert-danger">
+                <% if (messages) { %>
+                  <%= messages %>
+                <% } %>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="closeModal()">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <form class="form-signin" action="/register" method="post">
+        <img class="mb-4" src="" alt="42" width="72" height="72">
+        <h1 class="h3 mb-3 font-weight-normal">Register</h1>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="email" id="inputEmail" class="form-control" placeholder="zhenyaPrigozhin@warthunder.uk" name="email" required autofocus>
+        <label for="inputUsername" class="sr-only">Username</label>
+        <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="username" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+        <label for="inputPassword2" class="sr-only">Password</label>
+        <input type="password" id="inputPassword2" class="form-control" placeholder="Confirm password" name="password_retried" required>
+        <button class="btn btn-lg btn-warning btn-block" type="submit">Register</button>
+        <p>&copy; 2019-2024</p>
+        <a class="nav-link" href="/tos">Terms Of Service</a>
+      </form>
+  </body>
+</html>

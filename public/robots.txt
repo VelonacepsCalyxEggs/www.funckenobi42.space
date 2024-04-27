@@ -1,0 +1,9 @@
+# This is a robots.txt file for www.example.com
+# It allows all bots to crawl the site, except for the /admin and /images folders
+# It also specifies the location of the sitemap file
+
+User-agent: *
+Disallow: /admin/
+Disallow: /images/
+
+Sitemap: http://funckenobi42.space/sitemap.xml

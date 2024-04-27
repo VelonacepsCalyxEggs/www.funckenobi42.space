@@ -1,0 +1,228 @@
+/*
+ * Globals
+ */
+ :root {
+  --bs-blue: #0d6efd;
+  --bs-indigo: #6610f2;
+  --bs-purple: #6f42c1;
+  --bs-pink: #d63384;
+  --bs-red: #dc3545;
+  --bs-orange: #fd7e14;
+  --bs-yellow: #ffc107;
+  --bs-green: #198754;
+  --bs-teal: #20c997;
+  --bs-cyan: #0dcaf0;
+  --bs-white: #fff;
+  --bs-gray: #6c757d;
+  --bs-gray-dark: #343a40;
+  --bs-primary: #0d6efd;
+  --bs-secondary: #3a3f42;
+  --bs-success: #198754;
+  --bs-info: #0dcaf0;
+  --bs-warning: #ffc107;
+  --bs-danger: #dc3545;
+  --bs-light: #f8f9fa;
+  --bs-dark: #212529;
+  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+}
+
+/* Links */
+a,
+a:focus,
+a:hover {
+  color: #fff;
+}
+
+/*
+ * Base structure
+ */
+
+html,
+body {
+  height: 100%;
+  background-color: transparent;
+  flex: auto;
+  display: flex;
+}
+
+body {
+  display: -ms-flexbox;
+  display: -webkit-box;
+  display: flex;
+  flex-grow: 1;
+  color: #fff;
+  padding: 0%;
+  margin: 0%;
+  min-width: 1024px;
+}
+.parallax {
+  width: inherit;
+  height: inherit;
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -9999;
+}
+
+.element1 {
+  position: absolute;
+  top: inherit;
+  left: 10%;
+  width: 16em;
+  height: 16em;
+  clip-path: polygon(100% 0, 0 100%, 0 0);
+  /* Other styling properties */
+}
+.element2 {
+  position: absolute;
+  top: 0;
+  left: 75%;
+  width: 16em;
+  height: 6em;
+  clip-path: polygon(100% 0, 0 100%, 0 0);
+  background-color: black; 
+  /* Other styling properties */
+}
+.element2::after { 
+  content: ""; 
+  width: 95%; 
+  height: 95%; 
+  position: absolute; 
+  background-color: #212529; 
+  clip-path: polygon(100% 0, 0 100%, 0 0);
+} 
+.borderRight {
+  border-bottom: 5px solid black;
+  position: absolute;
+  right: 0%;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+nav {
+  font-size: 3rem;
+  min-width: 764px;
+}
+
+.nav-link {
+  color: gold;
+}
+.nav-link:hover {
+  color: orange;
+}
+.nav-link:active {
+  color: orangered;
+}
+/*
+PARALLAX STUFF
+*/
+@keyframes loop_N {
+  from {
+      background-position: 0 0;
+  }
+
+  to {
+      background-position: 0 960px;
+  }
+}
+
+@keyframes loop_S {
+  from {
+      background-position: 0 0;
+  }
+
+  to {
+      background-position: 0 -960px;
+  }
+}
+
+@keyframes loop_E {
+  from {
+      background-position: 0 0;
+  }
+
+  to {
+      background-position: -960px 0;
+  }
+}
+
+@keyframes loop_W {
+  from {
+      background-position: 0 0;
+  }
+
+  to {
+      background-position: 960px 0;
+  }
+}
+
+.parallax_layer1, .parallax_layer2, .parallax_layer3,
+.fancy_parallax_layer1, .fancy_parallax_layer2, .fancy_parallax_layer3 {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-repeat: repeat;
+  animation: 400s linear infinite;
+  z-index: -1;
+}
+
+.parallax_layer1 {
+  background-image: url("/images/parallax/layer1.png");
+}
+
+.parallax_layer2 {
+  background-image: url("/images/parallax/layer2.png");
+}
+
+.parallax_layer3 {
+  background-image: url("/images/parallax/layer3.png");
+}
+
+.fancy_parallax_layer1 {
+  background-image: url("/images/parallax/layer1_fancy.png");
+}
+
+.fancy_parallax_layer2 {
+  background-image: url("../images/parallax/layer2_fancy.png");
+}
+
+.fancy_parallax_layer3 {
+  background-image: url("/images/parallax/layer3_fancy.png");
+}
+
+/* Extra Styles */
+
+img {
+  border-style: none;
+  image-rendering: pixelated
+}
+
+.content {
+  position: relative;
+  bottom: 0;
+  left: 250%;
+  top: 20%;
+  height: fit-content;
+  min-height: 32rem;
+  width: 32rem;
+  overflow: hidden; /* Hide overflowing triangles */
+  /* Additional styling (e.g., width, height, background color, etc.) */
+}
+
+.footer {
+  position: relative;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
+}
+
+.col-8 {
+  background-color: #3a3f42;
+}

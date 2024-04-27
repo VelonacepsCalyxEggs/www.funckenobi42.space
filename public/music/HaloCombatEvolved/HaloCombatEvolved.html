@@ -1,0 +1,148 @@
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252" style="font-family: century-gothic, sans-serif;">
+    <head>
+        <title>Main Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://use.typekit.net/oov2wcw.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io-client.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+        <style>
+.nav-link {
+            color: gold;
+            }
+            .nav-link:link {
+            color: gold;
+            }
+            .nav-link:hover {
+            color: orange;
+            }
+            .nav-link:active {
+            color: orangered;
+            }
+            .navbar-brand {
+                color:orangered
+            }
+            .dropdown-item {
+                background-color: gold;
+            }
+            canvas {
+            width: inherit;
+            height: inherit;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -9999;
+            }
+            body {
+                font-size: 2rem;
+                height: 100%;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-content: center;
+    flex-wrap: nowrap;
+            }
+            .navbar-toggler {
+              background-color: yellow;
+            }
+            .row {
+              width: inherit;
+            }
+
+.song-info {
+  flex: 1;
+}
+
+.song-title {
+  font-size: 1.2rem; /* Base font size */
+  font-family: sans-serif; /* Specify desired font family */
+}
+
+.button-container {
+  text-align: right;
+}
+
+.add-to-queue {
+  font-size: 1rem; /* Base font size */
+  font-family: sans-serif; /* Specify desired font family */
+  padding: 0.5rem 1rem; /* Adjust padding as needed */
+  border: 1px solid #ddd; /* Set border style */
+  background-color: #f2f2f2; /* Set background color */
+  cursor: pointer; /* Indicate interaction */
+}
+
+/* Adapt font size to screen size (media queries) */
+
+@media (max-width: 768px) {
+  .song-title {
+    font-size: 1rem;
+  }
+  .add-to-queue {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .song-title {
+    font-size: 0.8rem;
+  }
+  .add-to-queue {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+        </style>
+      <body style="background-color: black;">
+        <canvas id="canvas" style="width: inherit; height: inherit;"></canvas>
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgb(42, 42, 42);">
+            <div class="container-fluid">
+            <a class="navbar-brand" href="#" style="font-size: 2rem;">42</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" style="font-weight: bold;" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/radio">Radio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/files">Files</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/logout">Logout</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Dropdown link
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink" style="background-color: rgb(42, 42, 42);">
+                    <li><a class="dropdown-item" href="/profile/">Profile</a></li>
+                    <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                    </ul>
+                </li>
+                </ul>
+                <div><p class="h3" style="color: gold;">Welcome !</p><span class='h6 text-light rounded' style='display: flex; width: auto; height: auto; text-align: center; justify-content: center; background-color: lightseagreen'></span></div>
+            </div>
+            </div>
+        </nav> 
+        <div class="container-fluid" style="height: fit-content; width: 25em; display: flex;">
+          <div class="container-fluid" style="background-color: gray;display: flex;flex-wrap: wrap;justify-content: flex-start;flex-direction: column;align-items: flex-start;align-content: stretch;">
+                <div><a class="nav-link" href=""><h3>Halo: Combat Evolved</h3></a></div>
+                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2606 - Opening Suite By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2606">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2607 - Truth and Reconciliation Suite By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2607">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2608 - Brothers in Arms By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2608">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2609 - Enough Dead Heroes By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2609">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2610 - Perilous Journey By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2610">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2611 - A Walk in the Woods By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2611">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2612 - Ambient Wonder By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2612">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2613 - The Gun Pointed at the Head of the Universe By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2613">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2614 - Trace Amounts By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2614">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2615 - Under Cover of Night By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2615">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2616 - What Once Was Lost By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2616">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2617 - Lament for Pvt. Jenkins By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2617">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2618 - Devils... Monsters... By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2618">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2619 - Covenant Dance By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2619">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2620 - Alien Corridors By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2620">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2621 - Rock Anthem for Saving the World By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2621">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2622 - The Maw By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2622">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2623 - Drumrun By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2623">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2624 - On a Pale Horse By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2624">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2625 - Perchance to Dream By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2625">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2626 - Library Suite By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2626">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2627 - The Long Run By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2627">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2628 - Suite Autumn By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2628">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2629 - Shadows By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2629">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2630 - Dust and Echoes By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2630">Add to queue</button>                </div>                </div>                                <div class="song-container">                <div class="song-info">                    <span class="song-title">2631 - Halo By Michael Salvatori feat. Martin O'Donnell From Halo: Combat Evolved</span>                </div>                <div class="button-container">                    <button class="queueButton" value="2631">Add to queue</button>                </div>                </div>                
+          </div>
+      </div>
+      </body>
+      <script src="static/animation.js"></script>
+      <script src="static/queueeditorsocket.js"></script>
+      
+    </head>
+  </html>
