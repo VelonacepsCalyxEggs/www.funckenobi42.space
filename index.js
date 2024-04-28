@@ -15,6 +15,8 @@ const config = require('./config/config'); // Import the configuration
 const config_radio = require('./config/configRadio'); // Import the configuration
 const config_nodemailer = require('./config/nodemailerConfig'); // Import the configuration
 const session = require('./config/sessionConfig'); // Import the configuration
+const multer = require('multer');
+const { body, validationResult } = require('express-validator');
 
 app.set('view engine', 'ejs');
 
@@ -23,6 +25,40 @@ const pool_radio = new Pool(config_radio);
 const transporter = nodemailer.createTransport(config_nodemailer); // Use the configuration to create the transporter
 
 app.use(express.static('public'));
+
+// Set up storage for uploaded files
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, `C:/Server/nodeJSweb/public/files/user/${req.session.username}`); // Specify the directory where files will be saved
+  },
+  filename: async (req, file, cb) => {
+    // Access the uploaded file using req.file
+    const avatarFile = req.file;
+    console.log('Uploaded file:', avatarFile);
+
+    // Rest of your code...
+    // Save the file path to your database or perform other actions
+    const uniqueSuffix = req.session.username;
+    const client = await pool.connect();
+    await client.query('UPDATE users SET picture = $1 WHERE token = $2', [`files/user/${req.session.username}/${file.fieldname + '-' + uniqueSuffix + '.jpg'}`, req.session.token]);
+    client.release();
+
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg'); // Customize the file name
+  }});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+      return callback(null, false);
+    }
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 10000000 // Limit file size if needed
+  }
+}).single('avatar')
 
 app.use(session); // Use the session middleware
 
@@ -51,42 +87,283 @@ async function handleAuth(req) {
 app.get('/', (req, res) => {
     if (req.session.token) {
         if(handleAuth(req)) {
-          res.render('index', { username: req.session.username });
-          console.log('42')
-        }
+              res.render('index', {
+                username: req.session.username,
+                editOptions: `
+                <form action="/uploadAvatar" method="POST" enctype="multipart/form-data">
+                <input type="file" name="avatar">
+                <button type="submit">Upload Avatar</button>
+                </form>
+              `,
+                navbar: `
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="/">Home</a>
+              </li>
+              <li class="nav-item" style="font-weight: 300;">
+                <a class="nav-link" href="/radio">Radio</a>
+              </li>
+                `
+            });
+          }
         else {
           res.send('invalid token')
         }
       } else {
-        res.render('index', { username: 'Stranger' });
+        res.render('index', {
+          username: 'Stranger',
+          navbar: `
+          <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/radio">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/register">Register</a>
+          </li>
+          `
+        });
       }
+    });
+
+
+async function getProfile(username) {
+  const client = await pool.connect();
+  const resultUser = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+  client.release();
+  if (resultUser.rows[0]) {
+    return resultUser.rows[0];
+  } else {
+    return false;
+  }
+}
+
+const validateFile = async (req, res, next) => {
+  var referrer = req.get('Referer') || 'Unknown';
+  console.log(`Referrer: ${referrer}`);
+  referrer = String(referrer).split('/')
+  const profile = await getProfile(referrer[referrer.length - 1]);
+  if (req.session.token === profile["token"]) {
+    
+  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+  const fileExtension = req.file.filename.slice(-4).toLowerCase();
+  if (!allowedExtensions.includes(fileExtension)) {
+    return res.status(409).send({ message: 'Provide a valid extension [.jpg, .jpeg, .png, .gif.]' });
+  }
+  const dir = `C:/Server/nodeJSweb/public/files/user/${req.session.username}`
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+    console.log(`Created directory: ${dir}`);
+  } else {
+    console.log(`Directory already exists: ${dir}`);
+  }
+  const contentLength = req.get('Content-Length');
+  const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+  if (contentLength > maxSizeInBytes) {
+    return res.status(409).send({ message: 'Your mama too big, max 10 mb.' });
+  }
+}
+
+
+  // Validation passed, proceed to the next middleware (Multer)
+  next();
+};
+
+app.post(
+  '/uploadAvatar',
+  upload, // Handle the file upload
+  async (req, res) => {
+  // Handle the uploaded file here
+  if (req.file) {
+    // File successfully uploaded
+    res.status(200).send('File uploaded successfully.');
+  } else {
+    // No file uploaded or an error occurred
+    res.status(400).send('Error uploading file. Please try again.');
+  }
 });
+
+
+app.get('/profile/:userProfile', async (req, res) => { // Add 'async' here
+const userProfile = req.params.userProfile;
+if (userProfile) {
+  try {
+    const profile = await getProfile(userProfile); // Await the result
+    if (profile) {
+      console.log(req.session.token)
+      console.log(profile["token"])
+      if (req.session.token === profile["token"]) {
+        res.render('profile', {
+          username: req.session.username,
+          profileUsername: profile["username"],
+          avatar: profile["picture"],
+          editOptions: `
+          <form action="/uploadAvatar" method="POST" enctype="multipart/form-data">
+          <input type="file" name="avatar">
+          <button type="submit">Upload Avatar</button>
+          </form>
+        `,
+          navbar: `
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/radio">Radio</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+        <a class="nav-link" href="${req.get('Referer')}">Back</a>
+        </li>
+          
+          `
+        });
+      } else if(req.session.token) {
+        res.render('profile', {
+          username: req.session.username,
+          profileUsername: profile["username"],
+          avatar: profile["picture"],
+          editOptions: 'This account is not yours',
+          navbar: `
+          <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/radio">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="${req.get('Referer')}">Back</a>
+          </li>
+          `
+        });
+      } else {
+        res.render('profile', {
+          username: 'Stranger',
+          profileUsername: profile["username"],
+          avatar: profile["picture"],
+          editOptions: 'This account is not yours, or is it?',
+          navbar: `
+          <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/radio">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/login">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/register">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="${req.get('Referer')}">Back</a>
+          </li>
+          `
+        });
+      }
+    } else {
+      res.send('This profile does not exist.');
+    }
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).send('Internal server error');
+  }
+} else {
+  res.send('No profile specified.');
+}
+});
+
+
 
 app.get('/about', (req, res) => {
   if (req.session.token) {
       if(handleAuth(req)) {
-        res.render('about', { username: req.session.username });
+        res.render('about', {
+          username: req.session.username,
+          navbar: `
+          <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/radio">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="${req.get('Referer')}">Back</a>
+          </li>
+          `
+        });
         console.log('42')
       }
       else {
         res.send('invalid token')
       }
     } else {
-      res.render('about', { username: 'Stranger' });
+      res.render('about', {
+        username: 'Stranger',
+        navbar: `
+        <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/radio">Radio</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/login">Login</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/register">Register</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="${req.get('Referer')}">Back</a>
+        </li>
+        `
+      });
     }
 });
 
 app.get('/tos', (req, res) => {
   if (req.session.token) {
       if(handleAuth(req)) {
-        res.render('tos', { username: req.session.username });
-        console.log('42')
+        res.render('tos', {
+          username: req.session.username,
+          navbar: `
+          <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/radio">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="${req.get('Referer')}">Back</a>
+          </li>
+          `
+        });
       }
       else {
         res.send('invalid token')
       }
     } else {
-      res.render('tos', { username: 'Stranger' });
+      res.render('tos', {
+        username: 'Stranger',
+        navbar: `
+        <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/radio">Radio</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/login">Login</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/register">Register</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="${req.get('Referer')}">Back</a>
+        </li>
+        `
+      });
     }
 });
 
@@ -128,7 +405,9 @@ async function handleLogin(req, res) {
                 console.log('logged in')
                 const token = generateToken();
                 req.session.token = token;
-                await client.query('UPDATE users SET token = $1 WHERE id = $2;', [token, user[0]]);
+                console.log(req.session.token);
+                console.log(token)
+                await client.query('UPDATE users SET token = $1 WHERE id = $2;', [token, user["id"]]);
                 return res.redirect('/'); // Redirect to user dashboard
               } else {message = "Invalid email or password"}
             } else {message = "Please verify your account."}
@@ -229,25 +508,6 @@ async function handleLogin(req, res) {
       
       res.render('register', {messages: message});
 }
-
-app.get('/anyaupload', (req, res) => {
-  return res.render('upload')
-  });
-app.route('/anyaupload').post((req, res) => {
-  req.pipe(req.busboy); // Pipe it through busboy
-  req.busboy.on('file', (fieldname, file, filename) => {
-    console.log(`Upload of '${filename}' started '${fieldname}'`);
-    // Create a write stream of the new file
-    const fstream = fs.createWriteStream('C:/Server/nodeJSweb/public/files/42.mkv');
-    // Pipe it through
-    file.pipe(fstream);
-    // On finish of the upload
-    fstream.on('close', () => {
-      console.log(`Upload of '${filename}' finished`);
-      res.redirect('back');
-    });
-  });
-});
   
 
 //radio related stuff
@@ -304,9 +564,44 @@ server.listen(55064, () => {
 app.get('/radio', (req, res) => {
   if (req.session.username) {
     // Assuming 'userId' is the user's name stored in the session
-    res.render('radio', { username: req.session.username });
+    res.render('radio', {
+      username: req.session.username,
+      navbar: `
+      <li class="nav-item">
+      <a class="nav-link" aria-current="page" href="/">Home</a>
+      </li>
+      <li class="nav-item" style="font-weight: 300;">
+        <a class="nav-link" href="/radio">Radio</a>
+      </li>
+      <li class="nav-item" style="font-weight: 300;">
+      <a class="nav-link" href="/radio/music">Music</a>
+    </li>
+      <li class="nav-item" style="font-weight: 300;">
+        <a class="nav-link" href="${req.get('Referer')}">Back</a>
+      </li>
+      `
+    });
   } else {
-    res.render('radio', { username: 'Stranger' });
+    res.render('radio', {
+      username: 'Stranger',
+      navbar: `
+      <li class="nav-item">
+      <a class="nav-link" aria-current="page" href="/">Home</a>
+      </li>
+      <li class="nav-item" style="font-weight: 300;">
+        <a class="nav-link" href="/radio">Radio</a>
+      </li>
+      <li class="nav-item" style="font-weight: 300;">
+        <a class="nav-link" href="/login">Login</a>
+      </li>
+      <li class="nav-item" style="font-weight: 300;">
+        <a class="nav-link" href="/register">Register</a>
+      </li>
+      <li class="nav-item" style="font-weight: 300;">
+        <a class="nav-link" href="${req.get('Referer')}">Back</a>
+      </li>
+      `
+    });
   }
 });
 
@@ -377,7 +672,27 @@ app.get('/radio/music', async (req, res) => {
       });
     }
       // Render the 'music' template with username and music data
-      res.render('music', { username: req.session.username, music: htmlString, forward: parseInt(currentPage) + 1, back: parseInt(currentPage) - 1, filter: filterQuery, pages: `${currentPage} out of ${maxPages}`});
+      res.render('music', { username: req.session.username, 
+        music: htmlString, 
+        forward: parseInt(currentPage) + 1, 
+        back: parseInt(currentPage) - 1, 
+        filter: filterQuery, 
+        pages: `${currentPage} out of ${maxPages}`,
+        navbar: `
+          <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/">Home</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/radio">Radio</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/radio/music">Music</a>
+        </li>
+          <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="${req.get('Referer')}">Back</a>
+          </li>
+          `
+      });
     } catch (error) {
       console.error('Error fetching music data:', error);
       res.status(500).send('Internal server error');
@@ -405,7 +720,21 @@ app.get('/radio/music/:userQuery', async (req, res) => {
           </div>
         `;
       });
-      res.render('albumDisplay', {username: req.session.username, albumList: htmlString, albumImg: queryAlbum.rows[0]["path_to_cover"], albumName: queryAlbum.rows[0]["album"]})
+      res.render('albumDisplay', {username: req.session.username, 
+        albumList: htmlString, 
+        albumImg: queryAlbum.rows[0]["path_to_cover"], 
+        albumName: queryAlbum.rows[0]["album"],
+        navbar: `
+        <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="/radio">Radio</a>
+        </li>
+        <li class="nav-item" style="font-weight: 300;">
+          <a class="nav-link" href="${req.get('Referer')}">Back</a>
+        </li>
+        `})
   } else {
     if (typeof(userQuery) == 'string') { 
     querySong = await radioSql.query(`SELECT * FROM music WHERE id = $1`, [userQuery]);
@@ -414,7 +743,26 @@ app.get('/radio/music/:userQuery', async (req, res) => {
     }
     radioSql.release();
     if (querySong.rows[0]) {
-        res.render('songDisplay', {username: req.session.username, songCover: querySong.rows[0]["path_to_cover"], songName: querySong.rows[0]["name"], songAuthor: querySong.rows[0]["author"], songAlbum: querySong.rows[0]["album"], songGenre: querySong.rows[0]["genre"], songMd5: querySong.rows[0]["md5"], songDate: querySong.rows[0]["date_added"] })
+        res.render('songDisplay', {username: req.session.username,
+           songCover: querySong.rows[0]["path_to_cover"],
+            songName: querySong.rows[0]["name"],
+             songAuthor: querySong.rows[0]["author"],
+              songAlbum: querySong.rows[0]["album"],
+               songGenre: querySong.rows[0]["genre"],
+                songMd5: querySong.rows[0]["md5"],
+                 songDate: querySong.rows[0]["date_added"],
+                 navbar: `
+                 <li class="nav-item">
+                 <a class="nav-link" aria-current="page" href="/">Home</a>
+                 </li>
+                 <li class="nav-item" style="font-weight: 300;">
+                   <a class="nav-link" href="/radio">Radio</a>
+                 </li>
+                 <li class="nav-item" style="font-weight: 300;">
+                   <a class="nav-link" href="${req.get('Referer')}">Back</a>
+                 </li>
+                 ` 
+                })
     } else {
       res.send('No such song, if this is an error, contact webmaster at contact@funckenobi42.space or func_kenobi in discord.')
     }

@@ -116,6 +116,9 @@ nav {
 .nav-link:active {
   color: orangered;
 }
+
+/* Add this rule to align "Your Profile" to the left */
+
 /*
 PARALLAX STUFF
 */

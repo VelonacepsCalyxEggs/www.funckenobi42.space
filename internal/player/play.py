@@ -33,7 +33,7 @@ def handler(client_soc, client_address):
                result = dataRequest.decode('UTF-8')
                result = str(result).split()
                try:
-                    conn = psycopg2.connect(**configus)
+                    conn = psycopg2.connect(**configus.db_config)
                     print("Connection successful!")
                except psycopg2.Error as e:
                     print(f"Error connecting to the database: {e}")
@@ -85,7 +85,7 @@ t.start()
 #this function writes data to SQL for my experiment             
 
 def writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft):
-     conn = psycopg2.connect(**configus2)
+     conn = psycopg2.connect(**configus2.db_config)
      print("Connection successful!")
      cur = conn.cursor()
      query1 = "UPDATE radiotohtml SET albumname = %s"
@@ -109,7 +109,7 @@ def writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft):
 # this function is responsible for playing the music.
 def Player():
      try:
-          conn = psycopg2.connect(**configus2)
+          conn = psycopg2.connect(**configus2.db_config)
           print("Connection successful!")
      except psycopg2.Error as e:
           print(f"Error connecting to the database: {e}")
@@ -176,91 +176,10 @@ def Player():
                     1 
           else:
                print('Custom playlist initialized')
-               with open(customPlaylistJson) as f2:
-                    existing_data = json.load(f2) 
-                    i2 = 1
-                    existing_data2 = []
-                    for bub in existing_data:
-                         bub['queueNumber'] = str(i2)
-                         i2 = i2 + 1
-                         existing_data2.append(bub)
-                    # Append the data to the list
-                    # Seek to the beginning and overwrite the file
-
-                    with open(customPlaylistJson, "w") as f2:
-                         json.dump(existing_data2, f2, indent=2)
-                    with open(customPlaylistJson) as f2:
-                         customData = json.load(f2)
-
-                    # Assign a unique queue number to the new data
-
-
-                    missingName = random.choice(AuthorNamesArr)
-                    filtered_list = [d3 for d3 in customData if d3['queueNumber'] == '1'] # we choose a song with a corresponding queueNumber in the file
-                    print(filtered_list)
-                    activeSong = filtered_list[0]['songPath'] # we get the path to the song
-                    print(activeSong)
-                    sound = AudioSegment.from_mp3(activeSong.replace("\\", "/")) # get the audio segment from the active song
-                    timeleft = ((sound.duration_seconds),)
-                    whenstarted = (datetime.now(),)
-                    audio = MP3(activeSong) # for metadata 
-                    songName = audio.get("TIT2", 'ligma')
-                    songArtist = audio.get("TPE1", missingName)
-                    songAlbum = audio.get("TALB", 'gigaballs')
-                    customPlaylist = os.path.getsize(customPlaylistJson)
-                    writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft)
-                    timeleft = int(sound.duration_seconds)
-                    print(timeleft)
-                    print(filtered_list)
-                    host = "localhost"
-                    port = 55063
-
-                    # Create a socket object
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-                    # Connect to the server
-                    s.connect((host, port))
-
-                    # Send a message
-                    message = str(songName) + '?/' + str(songArtist) + '?/' + str(songAlbum) + '?/' + str(whenstarted) + '?/' + str(timeleft)
-                    s.sendall(message.encode())
-
-                    # Close the socket
-                    s.close()
-                    playback_obj = _play_with_simpleaudio(sound) #I AM GOING TO HANG MYSELF ON MY FUCKING HEADPHONE WIRES.
-                    while playback_obj.is_playing():
-                         pass
-
-                    customPlaylistJson = os.path.join('C:/Server/nodeJSweb/public/data/custom.json')
-                    with open(customPlaylistJson) as f2:
-                         existing_data = json.load(f2) 
-                    i2 = 1
-                    existing_data2 = []
-                    for bub in existing_data:
-                         bub['queueNumber'] = str(i2)
-                         i2 = i2 + 1
-                         existing_data2.append(bub)
-                    # Append the data to the list
-                    # Seek to the beginning and overwrite the file
-
-                    with open(customPlaylistJson, "w") as f2:
-                         json.dump(existing_data2, f2, indent=2)
-                    with open(customPlaylistJson) as f2:
-                         customData = json.load(f2)
-                    try:
-                         for chunk in customData:
-                              if chunk["queueNumber"] == '1':
-                                   customData.remove(chunk)
-
-                              # Overwrite the original file with the modified data
-                         with open(customPlaylistJson, "w") as file:
-                              json.dump(customData, file, indent=4)  # Indent for readability
-                    except:
-                         print('Someone removed the track already... why...')
      # once the custom playlist is clear, we choose another random song.
           queueNumber = random.randint(1, maxQueueNumber)   
      # rinse and repeat
      return(1)
 
-# make an integration with node.js API for my website /s
+# make an integration with node.js API for my website 
 # le make a good system for turning off the script when it's a new day.

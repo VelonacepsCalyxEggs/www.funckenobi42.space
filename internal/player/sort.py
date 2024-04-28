@@ -18,7 +18,7 @@ def calculate_md5_large(file_path):
 
 def collectInitialData():
     try:
-        conn = psycopg2.connect(**configus2)
+        conn = psycopg2.connect(**configus2.db_config)
         print("Connection successful!")
     except psycopg2.Error as e:
         print(f"Error connecting to the database: {e}")

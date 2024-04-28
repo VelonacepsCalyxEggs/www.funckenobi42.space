@@ -8,3 +8,4 @@ web_modules/
 config/
 configus.py
 configus2.py
+_pycache_/
