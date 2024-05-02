@@ -2,7 +2,32 @@
 <html lang="en">
   <head>
     <meta name="description" content="The website of func_kenobi.">
-
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script>
+      function setFilter() {
+        filter = document.getElementById('filter')
+        filter = filter.value
+        document.location = `http://www.funckenobi42.space/radio/music?p=1&f=${filter}`
+      }
+      function goToPage() {
+        page = document.getElementById('goToPage');
+        page = page.value
+        document.location = `http://www.funckenobi42.space/radio/music?p=${page}&f=<%- filter %>`
+      }
+      function addToQueue(id) {
+      jQuery.ajax({
+          url: `/api/addToPlaylist/${id}`, // Endpoint URL
+          method: 'GET', // Or 'POST' if you used app.post() on the server
+          success: function(response) {
+              console.log('Server function executed:', response);
+              // Handle the response from the server
+          },
+          error: function(err) {
+              console.error('Error calling server function:', err);
+          }
+      });
+  }
+      </script>
     <title><%- songName %></title>
     <%- include('partials/header') %>
   </head>
@@ -37,6 +62,7 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://www.funckneobi42.space/scripts/queueManager.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
     <script src="/js/vendor/popper.min.js"></script>

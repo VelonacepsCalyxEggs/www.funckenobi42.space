@@ -53,6 +53,12 @@ const upload = multer({
     if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
       return callback(null, false);
     }
+    fs.mkdir(`C:/Server/nodeJSweb/public/files/user/${req.session.username}`, { recursive: true }, (err) => {
+      if (err) {
+        return callback(null, false)
+      }
+      console.log('Folder created successfully!');
+    });
     callback(null, true);
   },
   limits: {
@@ -517,12 +523,53 @@ async function getSong(id) {
       const client = await pool_radio.connect();
 
       const resultSong = await client.query('SELECT * FROM music WHERE id = $1', [id]);
-      const song = resultSong.rows;
-
+      const song = resultSong.rows[0];
       client.release(); // Release the client back to the pool
 
       return song;
     }
+async function addSongToPlaylist(id, req) {
+      if(handleAuth(req)) {
+        const client = await pool_radio.connect();
+        const resultSong = await client.query('SELECT * FROM music WHERE id = $1', [id]);
+        const songID = resultSong.rows[0]["id"];
+        await client.query('INSERT INTO playlist(song_id, added_by_user) VALUES($1, $2)', [id, req.session.username]);
+        client.release(); // Release the client back to the pool
+        updateQueueClient(); // update the queue for all clients
+        return true;
+      } else {
+        return false
+      }
+    }
+async function updateQueueClient() {
+  const client = await pool_radio.connect();
+  const resultSongs = await client.query('SELECT * FROM playlist ORDER BY id ASC');
+  let htmlString42 = '';
+  let i = 1;
+  
+  for (const song of resultSongs.rows) {
+    const playlistSong = await client.query('SELECT * FROM music WHERE id = $1', [parseInt(song['song_id'])]);
+    if (playlistSong.rows.length > 0) {
+      const songData = playlistSong.rows[0];
+      htmlString42 += `
+      <tr>
+        <th scope="row">${i}</th> 
+        <td>${songData.name}</td>
+        <td>${songData.author}</td>
+        <td>${songData.album}</td>
+      </tr>
+      `;
+      i++;
+    }
+  }
+  
+  global.queue = htmlString42;
+  client.release();
+  
+  wss.clients.forEach((client) => {
+    client.send(htmlString42);
+  });
+}
 
 worker.on('message', async (message) => {
   try {
@@ -530,24 +577,27 @@ worker.on('message', async (message) => {
     const song = await getSong(message);
     console.log(song);
     global.currentSong = song;
-
+    global.currentSong['base64_album'] = Buffer.from(global.currentSong["album"],'utf-8').toString('base64');
+    global.currentSong = JSON.stringify(global.currentSong)
     // Broadcast the updated song data to all connected clients
     wss.clients.forEach((client) => {
-      client.send(JSON.stringify(global.currentSong));
+      client.send(global.currentSong);
     });
+    await updateQueueClient()
   } catch (error) {
     console.error('Error fetching song:', error);
   }
 });
 
-worker.postMessage('Request data from TCP socket');
 
-wss.on('connection', (ws) => {
+wss.on('connection', async (ws) => {
   console.log('Client connected via WebSocket');
 
   // Send initial data (optional)
-  ws.send(JSON.stringify(global.currentSong));
+  ws.send(global.currentSong);
+  await updateQueueClient();
   console.log(global.currentSong + ' was sent to client')
+  console.log(global.queue + ' was sent to client')
 
   // Simulate sending data periodically (replace with your logic)
 
@@ -559,6 +609,13 @@ wss.on('connection', (ws) => {
 
 server.listen(55064, () => {
   console.log('Express server with WebSocket listening on port 55064');
+});
+
+app.get('/api/addToPlaylist/:songID', async function(req, res) {
+  const songID = req.params.songID;
+  await addSongToPlaylist(songID, req)
+  await updateQueueClient;
+  res.send('Song added to queue.');
 });
 
 app.get('/radio', (req, res) => {
@@ -626,7 +683,7 @@ app.get('/radio/music', async (req, res) => {
       var maxPages = (queryDataLength.rows[0]["max"]) / 6;
       if (filter == undefined) {
         console.log('No filter')
-        queryData1 = await radioSql.query(`SELECT * FROM music LIMIT ${pageSize} OFFSET ${offset}`);
+        queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} OFFSET ${offset}`);
       } else {
         if (filter == 'album') {
           console.log('Album filter')
@@ -635,11 +692,12 @@ app.get('/radio/music', async (req, res) => {
         }
         else if (filter == 'id') {
           console.log('Id filter')
-          queryData1 = await radioSql.query(`SELECT * FROM music LIMIT ${pageSize} OFFSET ${offset}`);
+          console.log(offset)
+          queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} OFFSET ${offset}`);
         }
         else {
           console.log('what?')
-          queryData1 = await radioSql.query(`SELECT * FROM music LIMIT ${pageSize} OFFSET ${offset}`);
+          queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} OFFSET ${offset}`);
         }
         filterQuery = `&f=${filter}`
       }     
@@ -659,11 +717,12 @@ app.get('/radio/music', async (req, res) => {
         });
       }
       else {
+      console.log(queryData1)
       queryData1.rows.forEach((song) => {
-
+        console.log(`adding song with id ${song.id}`)
         htmlString += `
           <div>
-            <a class="nav-link" href="music/${song.id}">${song.name}<button>+</button></a>
+            <a class="nav-link" href="music/${song.id}">${song.name}</a><button onclick="addToQueue(${song.id})">+</button>
             <p>Author: ${song.author}</p>
             <p>Album: ${song.album}</p>
             <!-- Add other relevant properties here -->
@@ -708,13 +767,15 @@ app.get('/radio/music/:userQuery', async (req, res) => {
   const radioSql = await pool_radio.connect();
   if (String(userQuery.length) > 4) {
       const decodedQuery = Buffer.from(userQuery, 'base64').toString('utf-8');
+      console.log(decodedQuery)
       queryAlbum = await radioSql.query(`SELECT * FROM music WHERE album = $1`, [decodedQuery]);
+      if (queryAlbum.rows[0]) {
       var htmlString = '';
       queryAlbum.rows.forEach((song) => {
 
         htmlString += `
           <div>
-            <a class="nav-link" href="${song.id}">${song.name}<button>+</button></a>
+            <a class="nav-link" href="${song.id}">${song.name}</a><button onclick="addToQueue(${song.id})">+</button>
             <p>Author: ${song.author}</p>
             <!-- Add other relevant properties here -->
           </div>
@@ -735,6 +796,9 @@ app.get('/radio/music/:userQuery', async (req, res) => {
           <a class="nav-link" href="${req.get('Referer')}">Back</a>
         </li>
         `})
+      } else {
+        res.send(`No such album as: ${decodedQuery}`)
+      }
   } else {
     if (typeof(userQuery) == 'string') { 
     querySong = await radioSql.query(`SELECT * FROM music WHERE id = $1`, [userQuery]);
@@ -769,12 +833,6 @@ app.get('/radio/music/:userQuery', async (req, res) => {
 
   }
 });
- 
-worker.on('message', (currentSong) => {
-  console.log('Received data from worker thread in main thread:', currentSong);
-  global.currentSong = currentSong // Update the global variable
-})
-
 
 const PORT = process.env.PORT || 42125;
 app.listen(PORT, () => {

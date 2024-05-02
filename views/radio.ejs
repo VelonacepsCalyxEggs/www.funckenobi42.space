@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta name="description" content="The website of func_kenobi.">
-
+    <script src="http://www.funckenobi42.space/scripts/bundle.js"></script>
     <title>Radio</title>
     <%- include('partials/header') %>
   </head>
@@ -13,28 +13,42 @@
       <div class="col-2 p-3"></div>
       <div class="col-8 p-3" style="display: flex; flex: 1; flex-direction: column; overflow: scroll;">
             <div class="container-fluid text-wrap" style="display: flex; width: 64rem; height: 12rem; font-size: 3em; text-align: left; text-justify: auto;">
-                <div class="container-fluid text m-0 p-0" style="width: 12rem;">
-                </div>
-                <div class="container-fluid">
-                  <h5 class="text-wrap" id="song" style="display: flex; flex-direction: column; text-align: left; align-items: baseline; justify-content: left;">loading...</h5>
+                <div class="container-fluid p-1">
+                  <h5 class="text-wrap p-1 m-1" id="song" style="display: flex; flex-direction: column; text-align: left; align-items: baseline; justify-content: left;">loading...</h5>
+                  <audio autoplay="false" controls="true" src="http://www.funckenobi42.space:55060/stream"></audio>
+                  <table class="table table-bordered" style="font-size: 1rem;">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Author</th>
+                        <th scope="col">Album</th>
+                      </tr>
+                    </thead>
+                    <tbody id="queue">
+  
+                    </tbody>
+                  </table>
                 </div>
             </div>
           </main>
 
       <script>
         const outputDiv = document.getElementById('song');
+        const outputDiv2 = document.getElementById('queue');
         const ws = new WebSocket('ws://www.funckenobi42.space:55064');
 
         ws.addEventListener('message', (event) => {
           var message = event.data;
           try {
-          dict = JSON.parse(message);
+          var dict = JSON.parse(message);
           console.log(dict)
-          songInfo = `<div>${dict[0].name} <span class="text" style="color:grey;"> by </span> ${dict[0].author} <span class="text" style="color:grey;"> from </span> ${dict[0].album}</div><div style="font-size:medium;">*\tGenre: ${dict[0].genre}</div><div style="font-size:medium;">*\tDate added: ${dict[0].date_added}</div><div style="font-size:medium;">*\tMD5 Checksum: ${dict[0].md5}</div>`
+          songInfo = `<div style="display:flex; flex-direction: row; flex: 1;"><a class="nav-link" href="http://www.funckenobi42.space/radio/music/${dict.id}">${dict.name}&#160;</a><span class="text" style="color:grey;">by&#160;</span>${dict.author}&#160; <span class="text" style="color:grey;">from&#160;</span><a class="nav-link" href="http://www.funckenobi42.space/radio/music/${dict.base64_album}">${dict.album}</a></div><div style="font-size:medium;">*\tGenre: ${dict.genre}</div><div style="font-size:medium;">*\tDate added: ${dict.date_added}</div><div style="font-size:medium;">*\tMD5 Checksum: ${dict.md5}</div>`
           outputDiv.innerHTML = `${songInfo}`;
           }
-          catch {
-            console.log('Error')
+          catch(ex){
+          console.log(ex)
+          queue.innerHTML = message;
           }
         });
 
