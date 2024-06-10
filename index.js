@@ -19,7 +19,7 @@ const session = require('./config/sessionConfig'); // Import the configuration
 const multer = require('multer');
 const { body, validationResult } = require('express-validator');
 const { Rcon } = require("rcon-client");
-
+const rateLimit = require('express-rate-limit');
 
 
 app.set('view engine', 'ejs');
@@ -29,6 +29,14 @@ const pool_radio = new Pool(config_radio);
 const transporter = nodemailer.createTransport(config_nodemailer); // Use the configuration to create the transporter
 
 app.use(express.static('public'));
+
+// Define the rate limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 256 // limit each IP to 100 requests per windowMs
+});
+
+app.use(apiLimiter);
 
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
