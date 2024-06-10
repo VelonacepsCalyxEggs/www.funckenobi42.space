@@ -20,7 +20,7 @@ const multer = require('multer');
 const { body, validationResult } = require('express-validator');
 const { Rcon } = require("rcon-client");
 const rateLimit = require('express-rate-limit');
-
+const validator = require('validator');
 
 app.set('view engine', 'ejs');
 
@@ -711,7 +711,13 @@ app.get('/radio/music', async (req, res) => {
   if (req.session.username) {
     try {
       var currentPage = req.query.p;
+      if (currentPage) {
+        currentPage = validator.escape(currentPage);
+      }
       var SessionFilter = req.query.f;
+      if (SessionFilter) {
+      SessionFilter = validator.escape(SessionFilter);
+      }
       req.session.musicFilter = SessionFilter;
       filter = req.session.musicFilter
       filterQuery = filter;
@@ -808,7 +814,11 @@ app.get('/radio/music', async (req, res) => {
 });
 
 app.get('/radio/music/:userQuery', async (req, res) => {
-  const userQuery = req.params.userQuery;
+  let userQuery = req.params.userQuery;
+  if (userQuery) {
+    // Sanitize the user input
+    userQuery = validator.escape(userQuery);
+  }
   const radioSql = await pool_radio.connect();
   if (String(userQuery.length) > 4) {
       const decodedQuery = Buffer.from(userQuery, 'base64').toString('utf-8');
