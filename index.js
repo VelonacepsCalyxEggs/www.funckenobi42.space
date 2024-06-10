@@ -388,11 +388,16 @@ app.get('/tos', (req, res) => {
     }
 });
 
-async function hashPassword(password) {
-    const hash = crypto.createHash('sha256');
-    hash.update(password);
-    return hash.digest('hex');
-  }
+
+function hashPassword(password, salt, iterations, keylen, digest) {
+  return new Promise((resolve, reject) => {
+    crypto.pbkdf2(password, salt, iterations, keylen, digest, (err, derivedKey) => {
+      if (err) reject(err);
+      else resolve(derivedKey.toString('hex'), salt);
+    });
+  });
+
+}
 function encodeName(name) {
     const encodedName = Buffer.from(name, 'utf-8').toString('base64');
     return encodedName;
@@ -408,8 +413,19 @@ async function handleLogin(req, res) {
     message = '';
     if (req.method === "POST") {
         var { email, password } = req.body;
-        password = await hashPassword(password);
         const client = await pool.connect();
+        const iterations = 100000; // Recommended to be as high as possible
+        const keylen = 64; // Length of the derived key
+        const digest = 'sha512'; // More secure hashing algorithm
+        let salt = await client.query('SELECT salt FROM users WHERE email = $1', [email]);
+        salt = salt.rows[0];
+        salt = salt["salt"]
+        if (!salt) {
+          message = "Where salt waltuh?"
+          client.release(); // Release the client back to the pool
+          res.render('login', {messages: message});
+        }
+        password = await hashPassword(password, salt, iterations, keylen, digest);
         try {
         // Query user from the database
         const resultUser = await client.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -515,8 +531,12 @@ async function handleLogin(req, res) {
                     req.session.token = token; // Store token in session
                     req.session.emailVerified = false; // Set email verification status
                     await sendVerificationEmail(email, token);
-                    password = await hashPassword(password); // Await the hashed password
-                    await client.query('INSERT INTO users(username, email, password, token) VALUES ($1, $2, $3, $4)', [username, email, password, token]);
+                    const iterations = 100000; // Recommended to be as high as possible
+                    const keylen = 64; // Length of the derived key
+                    const digest = 'sha512'; // More secure hashing algorithm
+                    const salt = crypto.randomBytes(16).toString('hex');
+                    password = await hashPassword(password, salt, iterations, keylen, digest);
+                    await client.query('INSERT INTO users(username, email, password, token, salt) VALUES ($1, $2, $3, $4, $5)', [username, email, password, token, salt]);
                     console.log('registered successfully');
                     client.release()                 
                     return res.redirect('/login'); // Redirect to login page
