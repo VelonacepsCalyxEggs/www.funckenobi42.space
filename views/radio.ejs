@@ -15,7 +15,14 @@
             <div class="container-fluid text-wrap" style="display: flex; width: 64rem; height: 12rem; font-size: 3em; text-align: left; text-justify: auto;">
                 <div class="container-fluid p-1">
                   <h5 class="text-wrap p-1 m-1" id="song" style="display: flex; flex-direction: column; text-align: left; align-items: baseline; justify-content: left;">loading...</h5>
-                  <audio autoplay="false" controls="true" src="http://www.funckenobi42.space:55060/stream"></audio>
+                  <audio controls preload="none">
+                    <!-- Replace the URL below with your Icecast stream URL -->
+                    <source src="http://www.funckenobi42.space:55060/stream" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                  </audio>
+                  <p class="text" style="font-size: 0.75rem;">//There may be some descrepancy of what you hear, and what you see, this is caused by either your internet, or my internet. I recommend reloading the page with ctrl+f5.</p>
+                  <p class="text" style="font-size: 0.75rem;">//Will probably be fixed soon™.</p>
+                  <p class="text" style="font-size: 0.75rem;">//Some progress was made, while I was sleeping I figured out a way to syncronize this crap, don't ask how.</p>
                   <table class="table table-bordered" style="font-size: 1rem;">
                     <thead>
                       <tr>
@@ -23,6 +30,7 @@
                         <th scope="col">Name</th>
                         <th scope="col">Author</th>
                         <th scope="col">Album</th>
+                        <th scope="col">Remove</th>
                       </tr>
                     </thead>
                     <tbody id="queue">
@@ -53,10 +61,11 @@
         });
 
       </script>
-      <%- include('partials/footer') %>
       </div>
       <div class="col-2 p-3"></div>
     </div>
+
+    <%- include('partials/footer') %>
 
    
 

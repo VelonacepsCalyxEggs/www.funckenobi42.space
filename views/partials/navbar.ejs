@@ -1,7 +1,7 @@
     <div b-mqsyp6eh3o="" id="parallax_layer1" class="fancy_parallax_layer1" style="animation-name: loop_E; animation-duration: 80s;"></div>
     <div b-mqsyp6eh3o="" id="parallax_layer2" class="fancy_parallax_layer2" style="animation-name: loop_E; animation-duration: 40s;"></div>
     <div b-mqsyp6eh3o="" id="parallax_layer3" class="fancy_parallax_layer3" style="animation-name: loop_E; animation-duration: 20s;"></div>
-    <nav class="navbar navbar-expand-lg bg-dark">
+    <nav class="navbar navbar-expand-lg bg-dark grad_nav1">
       <div class="container-fluid" style="align-items: baseline;">
         <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -9,16 +9,15 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
           <ul class="navbar-nav" style="flex: 1; display: flex;">
             <%- navbar %>
-            <li class="nav-item" style="font-weight: 300;">
-              <p style="font-weight: 500; font-size: 1.75rem; color: white; margin: 0px;">Welcome <%= username %>!</p>
-              <p style="font-weight: 500; font-size: 1.75rem; color: white; margin: 0px;">Your access level is: NOT_IMPLEMENTED</p>
-            </li>
           </ul>
-          <div class="navbar-nav" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-            <img src="http://www.funckenobi42.space/files/user/<%- username %>/avatar-<%- username %>.jpg" alt="42" style="width: 8vh; height: 8vh;">
-            <a class="nav-link p-0 m-0" style="margin-left: auto; float: right; display: flex; font-size: 1.5rem;" href="/profile/<%= username %>">Profile</a>
-            <a class="nav-link p-0 m-0" style="font-size: 1rem;" href="/logout">Logout</a>
-          </div>
         </div>
       </div>
+      <div class="container-fluid" style="flex: 1; display: flex; flex-direction: column;">
+        <p style="font-weight: 500; font-size: 1.5rem; color: white; margin: 0px; margin-left: 5%; margin-right: 5%;">Welcome <%= username %>!</p>
+        <p style="font-weight: 500; font-size: 1rem; color: white; margin: 0px; margin-left: 5%; margin-right: 5%;">Your access level is: NOT_IMPLEMENTED</p>
+      </div>
     </nav>
+    <div class="navbar navbar-expand-lg gradient-box" style="height: 5%;">
+      <div class="container-fluid" >
+      </div>
+    </div>

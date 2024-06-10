@@ -34,19 +34,21 @@
 
   <body style="flex-direction: column; height: 100%;">
     <%- include('partials/navbar') %>
-    <div class="row" style="width: 100%; height: 100%;">
+    <div class="row" style="width: 100%; height: 100%; max-height: 512px;">
       <div class="col-2 p-3"></div>
-      <div class="col-8 p-3" style="display: flex; flex: 1; flex-direction: column; max-height: 1024px;">
+      <div class="col-8 p-3" style="display: flex; flex: 1; flex-direction: column; max-height: 786px;">
                 <div id="musicList" style="overflow: scroll; ">
                     <img src="<%- albumImg %>" alt="songImage">
                     <h2><%- albumName %></h2>
                     <%- albumList %>
                 </div>
           <div style="display: flex; flex-direction: row; justify-content: baseline;">
-          <%- include('partials/footer') %>
+      </div>
       </div>
       <div class="col-2 p-3"></div>
     </div>
+
+    <%- include('partials/footer') %>
 
     
 
