@@ -35,7 +35,7 @@ const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 256 // limit each IP to 100 requests per windowMs
 });
-
+app.set('trust proxy', 1);
 app.use(apiLimiter);
 
 // Set up storage for uploaded files
