@@ -17,7 +17,7 @@ import configus2
 
 global playback_obj
 
-HOST = '' 
+HOST = 'localhost' 
 PORT = 55062 # choose a port number greater than 1024
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # create a TCP socket
 s.bind((HOST, PORT)) # bind the socket to the port
