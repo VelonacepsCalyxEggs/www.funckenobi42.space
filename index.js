@@ -616,40 +616,87 @@ async function updateQueueClient() {
   });
 }
 
-worker.on('message', async (message) => {
+
+async function getCurrentPlayingSong() {
+  const client = await pool_radio.connect();
   try {
-    console.log('Received data from worker:', message);
-    const song = await getSong(message);
-    console.log(song);
-    global.currentSong = song;
-    global.currentSong['base64_album'] = Buffer.from(global.currentSong["album"],'utf-8').toString('base64');
-    global.currentSong = JSON.stringify(global.currentSong)
-    // Broadcast the updated song data to all connected clients
-    wss.clients.forEach((client) => {
-      client.send(global.currentSong);
-    });
-    await updateQueueClient()
+    // Get the current time
+    const now = new Date();
+
+    // Query the database for the song that is currently playing
+    const queryText = 'SELECT id, when_started, duration FROM music_sync ORDER BY when_started DESC LIMIT 1';
+    const result = await client.query(queryText);
+
+    if (result.rows.length > 0) {
+      const currentSongSync = result.rows[0];
+      const whenStarted = new Date(currentSongSync.when_started);
+      const duration = currentSongSync.duration;
+      const timeElapsed = (now - whenStarted) / 1000; // convert to seconds
+
+      // Check if the current song is still playing
+      if (timeElapsed < duration) {
+        // The song is still playing, get the full song data from the music table
+        const fullSongData = await getSong(currentSongSync.id);
+        fullSongData['base64_album'] = Buffer.from(fullSongData["album"],'utf-8').toString('base64');
+        global.currentSong = fullSongData
+        return fullSongData;
+      }
+    }
+
+    // If no song is currently playing or the function did not return earlier, return null
+    return null;
   } catch (error) {
-    console.error('Error fetching song:', error);
+    console.error('Error in getCurrentPlayingSong:', error);
+    throw error;
+  } finally {
+    client.release();
   }
-});
+}
 
 
+// WebSocket connection event
 wss.on('connection', async (ws) => {
   console.log('Client connected via WebSocket');
 
-  // Send initial data (optional)
-  ws.send(global.currentSong);
-  await updateQueueClient();
-  console.log(global.currentSong + ' was sent to client')
-  console.log(global.queue + ' was sent to client')
+  // Send the current song to the newly connected client
+  const currentSong = await getCurrentPlayingSong();
+  await updateQueueClient()
+  console.log(currentSong)
+  if (currentSong) {
+    // Convert album to base64
+    ws.send(JSON.stringify(global.currentSong));
+  } else {
+    ws.send('No song is currently playing.');
+  }
+  ws.on('error', function(error) {
+    console.error('WebSocket error on connection:', error);
+  });
 
-  // Simulate sending data periodically (replace with your logic)
-
+  // Add a 'close' event listener to the WebSocket
+  ws.on('close', function(code, reason) {
+    console.log(`WebSocket connection closed with code: ${code}, reason: ${reason}`);
+  });
   // Handle incoming messages from the client
   ws.on('message', (message) => {
     console.log(`Received message: ${message}`);
   });
+});
+
+worker.on('message', async (message) => {
+  try {
+    console.log('Received data from worker:', message);
+
+    // Ensure global.currentSong is a string
+    await getCurrentPlayingSong();
+    const currentSongString = JSON.stringify(global.currentSong);
+    wss.clients.forEach((client) => {
+      client.send(currentSongString);
+    });
+
+    await updateQueueClient();
+  } catch (error) {
+    console.error('Error fetching song:', error);
+  }
 });
 
 server.listen(55064, () => {

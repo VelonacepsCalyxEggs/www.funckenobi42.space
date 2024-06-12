@@ -8,7 +8,7 @@ import json
 import random
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-from datetime import datetime
+from datetime import datetime, timezone
 import socket
 import threading
 import configus
@@ -84,27 +84,23 @@ t = threading.Thread(target=acceptor, args=(), daemon=True)
 t.start()
 #this function writes data to SQL for my experiment             
 
-def writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft):
-     conn = psycopg2.connect(**configus2.db_config)
-     print("Connection successful!")
-     cur = conn.cursor()
-     query1 = "UPDATE radiotohtml SET albumname = %s"
-     query2 = "UPDATE radiotohtml SET authorname = %s"
-     query3 = "UPDATE radiotohtml SET musicname = %s"
-     query4 = "UPDATE radiotohtml SET whenstarted = %s"
-     query5 = "UPDATE radiotohtml SET timeleft = %s"
-     cur.execute(query1, (str(songAlbum),))
-     conn.commit()
-     cur.execute(query2, (str(songArtist),))
-     conn.commit()
-     cur.execute(query3, (str(songName),))
-     conn.commit()
-     cur.execute(query4, (whenstarted),)
-     conn.commit()
-     cur.execute(query5, (timeleft),)
-     conn.commit()
-     conn.close()
-     return
+def writeDataToSQL(songName, songArtist, songAlbum, when_started, duration, id):
+    conn = psycopg2.connect(**configus2.db_config)
+    print("Connection successful!")
+    cur = conn.cursor()
+    query1 = """
+    INSERT INTO music_sync (name, author, album, duration, when_started, id) 
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+
+    
+    cur.execute(query1, (str(songName), str(songArtist), str(songAlbum), float(duration), when_started, id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return
+
+
 
 # this function is responsible for playing the music.
 def Player():
@@ -135,13 +131,13 @@ def Player():
                random_song = random.choice(filtered_list)
                activeSong = random_song[8] # we get the path to the song
                sound = AudioSegment.from_mp3(activeSong.replace("\\", "/")) # get the audio segment from the active song
-               timeleft = ((sound.duration_seconds),)
-               whenstarted = (datetime.now(),)
+               timeleft = sound.duration_seconds
+               whenstarted = datetime.now()
                audio = MP3(activeSong) # for metadata 
                songName = audio.get("TIT2", 'ligma')
                songArtist = audio.get("TPE1", missingName)
                songAlbum = audio.get("TALB", 'gigaballs')
-               writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft)
+               writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft, random_song[0])
                timeleft = int(sound.duration_seconds)
                print(timeleft)
                host = "localhost"
@@ -177,13 +173,13 @@ def Player():
                     currentSong = cur.fetchone()
                     activeSong = currentSong[8] # we get the path to the song
                     sound = AudioSegment.from_mp3(activeSong.replace("\\", "/")) # get the audio segment from the active song
-                    timeleft = ((sound.duration_seconds),)
-                    whenstarted = (datetime.now(),)
+                    timeleft = sound.duration_seconds
+                    whenstarted = datetime.now()
                     audio = MP3(activeSong) # for metadata 
                     songName = audio.get("TIT2", 'ligma')
                     songArtist = audio.get("TPE1", missingName)
                     songAlbum = audio.get("TALB", 'gigaballs')
-                    writeDataToSQL(songAlbum, songArtist, songName, whenstarted, timeleft)
+                    writeDataToSQL(songName, songArtist, songAlbum, whenstarted, timeleft, currentSong[0])
                     timeleft = int(sound.duration_seconds)
                     print(timeleft)
                     host = "localhost"

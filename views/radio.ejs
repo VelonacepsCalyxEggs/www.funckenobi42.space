@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta name="description" content="The website of func_kenobi.">
+    <meta name="description" content="The radio page.">
     <script src="http://www.funckenobi42.space/scripts/bundle.js"></script>
     <title>Radio</title>
     <%- include('partials/header') %>
@@ -15,11 +15,11 @@
             <div class="container-fluid text-wrap" style="display: flex; width: 64rem; height: 12rem; font-size: 3em; text-align: left; text-justify: auto;">
                 <div class="container-fluid p-1">
                   <h5 class="text-wrap p-1 m-1" id="song" style="display: flex; flex-direction: column; text-align: left; align-items: baseline; justify-content: left;">loading...</h5>
-                  <audio controls preload="none">
-                    <!-- Replace the URL below with your Icecast stream URL -->
-                    <source src="http://www.funckenobi42.space:55060/stream" type="audio/mpeg">
+                  <audio controls="" preload="auto">
+                    <source src="http://www.funckenobi42.space:55060/stream?${new Date().getTime()}" type="audio/mpeg">
                     Your browser does not support the audio element.
                   </audio>
+                 
                   <p class="text" style="font-size: 0.75rem;">//There may be some descrepancy of what you hear, and what you see, this is caused by either your internet, or my internet. I recommend reloading the page with ctrl+f5.</p>
                   <p class="text" style="font-size: 0.75rem;">//Will probably be fixed soon™.</p>
                   <p class="text" style="font-size: 0.75rem;">//Some progress was made, while I was sleeping I figured out a way to syncronize this crap, don't ask how.</p>
@@ -42,23 +42,62 @@
           </main>
 
       <script>
-        const outputDiv = document.getElementById('song');
-        const outputDiv2 = document.getElementById('queue');
-        const ws = new WebSocket('ws://www.funckenobi42.space:55064');
+            const outputDiv = document.getElementById('song');
+            const outputDiv2 = document.getElementById('queue');
+            
+            const ws = new WebSocket('ws://www.funckenobi42.space:55064');
 
-        ws.addEventListener('message', (event) => {
-          var message = event.data;
-          try {
-          var dict = JSON.parse(message);
-          console.log(dict)
-          songInfo = `<div style="display:flex; flex-direction: row; flex: 1;"><a class="nav-link" href="http://www.funckenobi42.space/radio/music/${dict.id}">${dict.name}&#160;</a><span class="text" style="color:grey;">by&#160;</span>${dict.author}&#160; <span class="text" style="color:grey;">from&#160;</span><a class="nav-link" href="http://www.funckenobi42.space/radio/music/${dict.base64_album}">${dict.album}</a></div><div style="font-size:medium;">*\tGenre: ${dict.genre}</div><div style="font-size:medium;">*\tDate added: ${dict.date_added}</div><div style="font-size:medium;">*\tMD5 Checksum: ${dict.md5}</div>`
-          outputDiv.innerHTML = `${songInfo}`;
-          }
-          catch(ex){
-          console.log(ex)
-          queue.innerHTML = message;
-          }
-        });
+            ws.addEventListener('close', function(event) {
+              console.log(`WebSocket closed: ${event.code}`);
+              // Attempt to reconnect with an exponential backoff
+              var reconnectInterval = 1000 * Math.pow(2, retryCount);
+              setTimeout(function() {
+                connectWebSocket();
+              }, reconnectInterval);
+            });
+            ws.addEventListener('message', (event) => {
+              messageHandler(event.data)
+            });
+
+            ws.addEventListener('close', (event) => {
+              console.log(`WebSocket closed: ${event.code}`);
+            });
+
+            ws.addEventListener('error', (error) => {
+              console.error('WebSocket error:', error);
+            });
+
+            function connectWebSocket() {
+              // Reset the WebSocket connection
+              ws = new WebSocket('ws://www.funckenobi42.space:55064');
+              // Add event listeners again
+              ws.addEventListener('message', (event) => {
+              messageHandler(event.data)
+            });
+            ws.addEventListener('close', (event) => {
+              console.log(`WebSocket closed: ${event.code}`);
+            });
+              // ... other event listeners ...
+            }
+            function messageHandler(message) {
+              
+              // Check if the message is an empty string
+              if (message === '') {
+                console.log('Received an empty message.');
+                // Handle the empty message case here
+              } else {
+                try {
+                  var dict = JSON.parse(message);
+                  console.log(dict);
+                  var songInfo = `<div style="display:flex; flex-direction: row; flex: 1;"><a class="nav-link" href="http://www.funckenobi42.space/radio/music/${dict.id}">${dict.name} </a><span class="text" style="color:grey;">by </span>${dict.author}  <span class="text" style="color:grey;">from </span><a class="nav-link" href="http://www.funckenobi42.space/radio/music/${dict.base64_album}">${dict.album}</a></div><div style="font-size:medium;">*\tGenre: ${dict.genre}</div><div style="font-size:medium;">*\tDate added: ${dict.date_added}</div><div style="font-size:medium;">*\tMD5 Checksum: ${dict.md5}</div>`;
+                  outputDiv.innerHTML = songInfo;
+                } catch (ex) {
+                  console.log(ex);
+                  console.log('Received non-JSON message:', message);
+                  outputDiv2.innerHTML = message;
+                }
+              }
+            }
 
       </script>
       </div>
