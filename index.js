@@ -472,8 +472,6 @@ if (userProfile) {
   try {
     const profile = await getProfile(userProfile); // Await the result
     if (profile) {
-      console.log(req.session.token)
-      console.log(profile["token"])
       if (req.session.token === profile["token"]) {
         res.render('profile', {
           username: req.session.username,
@@ -572,7 +570,6 @@ app.get('/about', (req, res) => {
           </li>
           `
         });
-        console.log('42')
       }
       else {
         res.send('invalid token')
@@ -667,7 +664,6 @@ return crypto.randomBytes(20).toString('hex');
 
 // Login handler
 async function handleLogin(req, res) {
-    console.log(`Received request with method: ${req.method}`); // Log the request method
     message = '';
     if (req.method === "POST") {
         var { email, password } = req.body;
@@ -695,19 +691,14 @@ async function handleLogin(req, res) {
         const user = resultUser.rows[0];
   
         // Compare submitted password with the stored hash
-        console.log(user)
         if (user) {
           if (user["confirmed"] == true) {
             if (user["password"] === password) {
 
-                console.log(user["username"]);
                 req.session.username = user["username"]; // Set user session
-                console.log('logged in')
                 const token = generateToken();
                 req.session.token = token;
                 req.session.userId = user['id']
-                console.log(req.session.token);
-                console.log(token)
                 await client.query('UPDATE users SET token = $1 WHERE id = $2;', [token, user["id"]]);
                 return res.redirect('/'); // Redirect to user dashboard
               } else {message = "Invalid email or password"}
@@ -752,7 +743,6 @@ async function handleLogin(req, res) {
   
     try {
       await transporter.sendMail(mailOptions);
-      console.log('Verification email sent');
     } catch (error) {
       console.error('Error sending verification email', error);
     }
@@ -800,7 +790,6 @@ async function handleLogin(req, res) {
                     const salt = crypto.randomBytes(16).toString('hex');
                     password = await hashPassword(password, salt, iterations, keylen, digest);
                     await client.query('INSERT INTO users(username, email, password, token, salt) VALUES ($1, $2, $3, $4, $5)', [username, email, password, token, salt]);
-                    console.log('registered successfully');
                     client.release()                 
                     return res.redirect('/login'); // Redirect to login page
               } else {message = "There is already an account with this username."}
@@ -911,12 +900,10 @@ async function getCurrentPlayingSong() {
 
 // WebSocket connection event
 wss.on('connection', async (ws) => {
-  console.log('Client connected via WebSocket');
 
   // Send the current song to the newly connected client
   const currentSong = await getCurrentPlayingSong();
   await updateQueueClient()
-  console.log(currentSong)
   if (currentSong) {
     // Convert album to base64
     ws.send(JSON.stringify(global.currentSong));
@@ -939,7 +926,6 @@ wss.on('connection', async (ws) => {
 
 worker.on('message', async (message) => {
   try {
-    console.log('Received data from worker:', message);
 
     // Ensure global.currentSong is a string
     await getCurrentPlayingSong();
@@ -1023,7 +1009,6 @@ app.get('/radio/music', async (req, res) => {
       req.session.musicFilter = SessionFilter;
       filter = req.session.musicFilter
       filterQuery = filter;
-      console.log(filter)
       if (currentPage == undefined || currentPage <= 0) {
         currentPage = 1;
       }
@@ -1032,24 +1017,19 @@ app.get('/radio/music', async (req, res) => {
       
       const radioSql = await pool_radio.connect();
       const queryDataLength = await radioSql.query(`SELECT max(id) FROM music`);
-      console.log(queryDataLength.rows[0])
       var maxPages = (queryDataLength.rows[0]["max"]) / 6;
       if (filter == undefined) {
         filterQuery = `&f=id`
         queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} offset ${offset}`);
       } else {
         if (filter == 'album') {
-          console.log('Album filter')
           queryData1 = await radioSql.query(`SELECT DISTINCT album FROM music`);
           maxPages = 1;
         }
         else if (filter == 'id') {
-          console.log('Id filter')
-          console.log(offset)
           queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} offset ${offset}`);
         }
         else {
-          console.log('what?')
           queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} offset ${offset}`);
         }
         filterQuery = `&f=${filter}`
@@ -1069,9 +1049,7 @@ app.get('/radio/music', async (req, res) => {
         });
       }
       else {
-      console.log(queryData1)
       queryData1.rows.forEach((song) => {
-        console.log(`adding song with id ${song.id}`)
         htmlString += `
           <div>
             <a class="nav-link" href="music/${song.id}">${song.name}</a><button onclick="addToQueue(${song.id})">+</button>
@@ -1124,7 +1102,6 @@ app.get('/radio/music/:userQuery', async (req, res) => {
   const radioSql = await pool_radio.connect();
   if (String(userQuery.length) > 4) {
       const decodedQuery = Buffer.from(userQuery, 'base64').toString('utf-8');
-      console.log(decodedQuery)
       queryAlbum = await radioSql.query(`SELECT * FROM music WHERE album = $1`, [decodedQuery]);
       if (queryAlbum.rows[0]) {
       var htmlString = '';
@@ -1193,7 +1170,6 @@ app.get('/radio/music/:userQuery', async (req, res) => {
 
 async function getLastButtonPress(userId) {
   const { rows } = await pool_radio.query('SELECT * FROM get_last_button_press($1)', [userId]);
-  console.log(rows)
   return rows[0];
 }
 
@@ -1213,7 +1189,6 @@ app.get('/api/button', async (req, res) => {
   if (!await handleAuth(req)) {
     return res.send('You are not authenticated!');
   }
-  console.log(`${req.session.username} has pressed the button!`)
   const userId = req.session.userId; // Assuming you store a persistent user ID in the session
 
   try {
@@ -1441,7 +1416,6 @@ async function serverButtonRandom() {
 
   // Send the selected command to the server and wait for the response
   let response = await rcon.send(randomCommand);
-  console.log(response);
   if (response.length < 2) {
     response = randomCommand;
   }
