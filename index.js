@@ -39,6 +39,18 @@ const apiLimiter = rateLimit({
 app.set('trust proxy', 1);
 app.use(apiLimiter);
 
+// logging
+const logUserActivity = (req, res, next) => {
+  res.on('finish', () => { // this will be called after the response is sent
+    const logEntryInitial = `Time: ${new Date().toISOString()}, Method: ${req.method}, URL: ${req.originalUrl}, Status: ${res.statusCode}, User-Agent: ${req.get('User-Agent')}`;
+    const logEntryEnd = `Username: ${req.session.username}, Status: ${req.session.emailVerified}, Hostname: ${req.hostname}, Path: ${req.path}, IP: ${req.ip}`
+    console.log(logEntryInitial + '\n' + logEntryEnd);
+  });
+  next();
+}; 
+
+app.use(logUserActivity)
+
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -427,7 +439,15 @@ app.get('/files/:username', async (req, res) => {
 
 app.get('/files/:username/preview/:filename', async (req, res) => {
   const fileUser = req.params.username;
+  if (fileUser) {
+    // Sanitize the user input
+    fileUser = validator.escape(userQuery);
+  }
   const filename = req.params.filename;
+  if (filename) {
+    // Sanitize the user input
+    filename = validator.escape(userQuery);
+  }
   const filePath = path.join(`G:/website/${fileUser}`, filename);
 
   try {
@@ -677,7 +697,9 @@ async function handleLogin(req, res) {
         salt = salt["salt"]
         }
         catch(error) {
-          res.send(error)
+          console.error(error)
+          message = "Invalid email or password";
+          res.render('login', {messages: message});
         }
         if (!salt) {
           message = "Invalid email or password";
