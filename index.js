@@ -275,7 +275,7 @@ const websiteStorage = multer.diskStorage({
       const fileUser = req.params.username;
       if (fileUser) {
         // Sanitize the user input
-        fileUser = validator.escape(userQuery);
+        fileUser = validator.escape(fileUser);
       }
       const directoryPath = `G:/website/${fileUser}`;
       cb(null, directoryPath);
@@ -307,12 +307,12 @@ app.get('/delete/:username/:filename', async (req, res) => {
           const fileUser = req.params.username;
           if (fileUser) {
             // Sanitize the user input
-            fileUser = validator.escape(userQuery);
+            fileUser = validator.escape(fileUser);
           }
           const filename = req.params.filename;
           if (filename) {
             // Sanitize the user input
-            filename = validator.escape(userQuery);
+            filename = validator.escape(filename);
           }
           const filePath = path.join(`G:/website/${fileUser}`, filename);
 
@@ -337,7 +337,7 @@ app.post('/upload/:username', userUpload.array('files'), async (req, res) => {
           const fileUser = req.params.username;
           if (fileUser) {
             // Sanitize the user input
-            fileUser = validator.escape(userQuery);
+            fileUser = validator.escape(fileUser);
           }
           const directoryPath = `G:/website/${fileUser}`;
           const storageUsedGB = await getUserStorageUsage(directoryPath);
@@ -372,7 +372,7 @@ app.get('/files/:username', async (req, res) => {
           const fileUser = req.params.username;
           if (fileUser) {
             // Sanitize the user input
-            fileUser = validator.escape(userQuery);
+            fileUser = validator.escape(fileUser);
           }
           const directoryPath = `G:/website/${fileUser}`;
           const items = await fsp.readdir(directoryPath);
@@ -441,12 +441,12 @@ app.get('/files/:username/preview/:filename', async (req, res) => {
   const fileUser = req.params.username;
   if (fileUser) {
     // Sanitize the user input
-    fileUser = validator.escape(userQuery);
+    fileUser = validator.escape(fileUser);
   }
   const filename = req.params.filename;
   if (filename) {
     // Sanitize the user input
-    filename = validator.escape(userQuery);
+    filename = validator.escape(filename);
   }
   const filePath = path.join(`G:/website/${fileUser}`, filename);
 
