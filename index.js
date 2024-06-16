@@ -47,7 +47,6 @@ const storage = multer.diskStorage({
   filename: async (req, file, cb) => {
     // Access the uploaded file using req.file
     const avatarFile = req.file;
-    console.log('Uploaded file:', avatarFile);
 
     // Rest of your code...
     // Save the file path to your database or perform other actions
@@ -70,7 +69,6 @@ const upload = multer({
       if (err) {
         return callback(null, false)
       }
-      console.log('Folder created successfully!');
     });
     callback(null, true);
   },
@@ -263,6 +261,10 @@ const getUserStorageUsage = async (directoryPath) => {
 const websiteStorage = multer.diskStorage({
   destination: function (req, file, cb) {
       const fileUser = req.params.username;
+      if (fileUser) {
+        // Sanitize the user input
+        fileUser = validator.escape(userQuery);
+      }
       const directoryPath = `G:/website/${fileUser}`;
       cb(null, directoryPath);
   },
@@ -291,7 +293,15 @@ app.get('/delete/:username/:filename', async (req, res) => {
   if (req.session.token && handleAuth(req)) {
       if (req.params.username === req.session.username) {
           const fileUser = req.params.username;
+          if (fileUser) {
+            // Sanitize the user input
+            fileUser = validator.escape(userQuery);
+          }
           const filename = req.params.filename;
+          if (filename) {
+            // Sanitize the user input
+            filename = validator.escape(userQuery);
+          }
           const filePath = path.join(`G:/website/${fileUser}`, filename);
 
           try {
@@ -313,6 +323,10 @@ app.post('/upload/:username', userUpload.array('files'), async (req, res) => {
   if (req.session.token && handleAuth(req)) {
       if (req.params.username === req.session.username) {
           const fileUser = req.params.username;
+          if (fileUser) {
+            // Sanitize the user input
+            fileUser = validator.escape(userQuery);
+          }
           const directoryPath = `G:/website/${fileUser}`;
           const storageUsedGB = await getUserStorageUsage(directoryPath);
           const storageLimitGB = 20; // 20 GB storage limit
@@ -344,6 +358,10 @@ app.get('/files/:username', async (req, res) => {
   if (req.session.token) {
       if(handleAuth(req)) {
           const fileUser = req.params.username;
+          if (fileUser) {
+            // Sanitize the user input
+            fileUser = validator.escape(userQuery);
+          }
           const directoryPath = `G:/website/${fileUser}`;
           const items = await fsp.readdir(directoryPath);
 
@@ -432,36 +450,6 @@ async function getProfile(username) {
   }
 }
 
-const validateFile = async (req, res, next) => {
-  var referrer = req.get('Referer') || 'Unknown';
-  console.log(`Referrer: ${referrer}`);
-  referrer = String(referrer).split('/')
-  const profile = await getProfile(referrer[referrer.length - 1]);
-  if (req.session.token === profile["token"]) {
-    
-  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
-  const fileExtension = req.file.filename.slice(-4).toLowerCase();
-  if (!allowedExtensions.includes(fileExtension)) {
-    return res.status(409).send({ message: 'Provide a valid extension [.jpg, .jpeg, .png, .gif.]' });
-  }
-  const dir = `C:/Server/nodeJSweb/public/files/user/${req.session.username}`
-  if (!fsp.existsSync(dir)) {
-    fsp.mkdirSync(dir);
-    console.log(`Created directory: ${dir}`);
-  } else {
-    console.log(`Directory already exists: ${dir}`);
-  }
-  const contentLength = req.get('Content-Length');
-  const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
-  if (contentLength > maxSizeInBytes) {
-    return res.status(409).send({ message: 'Your mama too big, max 10 mb.' });
-  }
-}
-
-
-  // Validation passed, proceed to the next middleware (Multer)
-  next();
-};
 
 app.post(
   '/uploadAvatar',
@@ -689,9 +677,14 @@ async function handleLogin(req, res) {
         const digest = 'sha512'; // More secure hashing algorithm
         let salt = await client.query('SELECT salt FROM users WHERE email = $1', [email]);
         salt = salt.rows[0];
+        try {
         salt = salt["salt"]
+        }
+        catch(error) {
+          res.send(error)
+        }
         if (!salt) {
-          message = "Where salt saltuh?"
+          message = "Invalid email or password";
           client.release(); // Release the client back to the pool
           res.render('login', {messages: message});
         }
