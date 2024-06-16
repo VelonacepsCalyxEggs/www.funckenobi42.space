@@ -9,7 +9,8 @@ const { Worker, parentPort } = require('worker_threads');
 const http = require('http');
 const server = http.createServer(app);
 const WebSocket = require('ws');
-const fs = require('fs');
+const fs = require('fs'); // For createReadStream
+const fsp = require('fs').promises; // For promise-based operations
 const { user } = require('pg/lib/defaults');
 const config = require('./config/config'); // Import the configuration
 const config_radio = require('./config/configRadio'); // Import the configuration
@@ -65,7 +66,7 @@ const upload = multer({
     if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
       return callback(null, false);
     }
-    fs.mkdir(`C:/Server/nodeJSweb/public/files/user/${req.session.username}`, { recursive: true }, (err) => {
+    fsp.mkdir(`C:/Server/nodeJSweb/public/files/user/${req.session.username}`, { recursive: true }, (err) => {
       if (err) {
         return callback(null, false)
       }
@@ -126,6 +127,9 @@ app.get('/', (req, res) => {
                 </span>
               </li>
               <li class="nav-item" style="font-weight: 300;">
+                    <a class="nav-link" href="/files">Files</a>
+              </li>
+              <li class="nav-item" style="font-weight: 300;">
                 <a class="nav-link" style="font-weight: 300;" href="/profile/${req.session.username}">Profile</a>
               </li>
               <li class="nav-item" style="font-weight: 300;">
@@ -148,6 +152,9 @@ app.get('/', (req, res) => {
             <a class="nav-link" href="/radio">Radio</a>
           </li>
           <li class="nav-item" style="font-weight: 300;">
+            <a class="nav-link" href="/files">Files</a>
+          </li>
+          <li class="nav-item" style="font-weight: 300;">
             <a class="nav-link" href="/login">Login</a>
           </li>
           <li class="nav-item" style="font-weight: 300;">
@@ -158,7 +165,262 @@ app.get('/', (req, res) => {
       }
     });
 
+//file stuff
 
+
+async function generateUserFolders() {
+  const client = await pool.connect();
+  try {
+    let users = await client.query('SELECT * FROM users WHERE confirmed = true');
+    for (let user of users.rows) {
+      // Generate a unique folder name, e.g., using the user ID
+      const folderName = `${user.username}`;
+      const folderPath = path.join('G:/website', folderName);
+
+      // Create the folder if it doesn't exist
+      await fsp.mkdir(folderPath, { recursive: true }); // No callback needed here
+      console.log(`Folder created for user ${user.id}: ${folderPath}`);
+    }
+  } catch (error) {
+    console.error('Error generating user folders:', error);
+  } finally {
+    client.release();
+  }
+}
+generateUserFolders()
+
+app.get('/files', async (req, res) => {
+  if (req.session.token) {
+      if(handleAuth(req)) {
+            await generateUserFolders()
+            // Define the path to the directory where the folders are located
+            const directoryPath = 'G:/website';
+
+            // Read the contents of the directory
+            const folders = await fsp.readdir(directoryPath);
+    
+            // Filter out files, keep only directories
+            const folderLinks = (await Promise.all(folders.map(async (folder) => {
+              const folderPath = path.join(directoryPath, folder);
+              const isDirectory = (await fsp.stat(folderPath)).isDirectory();
+              return isDirectory ? `<a href="/files/${folder}">${folder}</a>` : '';
+            }))).filter(link => link);
+
+            let folderLinkString = ''
+            for (let folder of folderLinks) {
+              folderLinkString += `${folder}`
+            }
+            res.render('files', {
+              username: req.session.username,
+              navbar: `
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/">Home</a>
+            </li>
+            <li class="nav-item" style="font-weight: 300;">
+              <span style="height: inherit">
+                  <a class="nav-link" href="/radio">Radio</a>
+              </span>
+            </li>
+            <li class="nav-item" style="font-weight: 300;">
+              <span style="height: inherit">
+                  <a class="nav-link" href="/files">Files</a>
+              </span>
+            </li>
+            <li class="nav-item" style="font-weight: 300;">
+              <a class="nav-link" style="font-weight: 300;" href="/profile/${req.session.username}">Profile</a>
+            </li>
+            <li class="nav-item" style="font-weight: 300;">
+                <a class="nav-link" style="font-weight: 200;" href="/logout">Logout</a>
+            </li>
+              `,
+              folders: folderLinkString
+          });
+        } 
+        else {
+          res.send('invalid token')
+        }
+    } else {
+      res.redirect('/')
+    }
+  });
+
+const getUserStorageUsage = async (directoryPath) => {
+  const files = await fsp.readdir(directoryPath);
+  let totalSize = 0;
+
+  for (const file of files) {
+      const filePath = path.join(directoryPath, file);
+      const stats = await fsp.stat(filePath);
+      totalSize += stats.size;
+  }
+
+  // Convert bytes to gigabytes
+  const totalSizeGB = totalSize / (1024 * 1024 * 1024);
+  return totalSizeGB;
+};
+
+// Set up storage engine for multer
+const websiteStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+      const fileUser = req.params.username;
+      const directoryPath = `G:/website/${fileUser}`;
+      cb(null, directoryPath);
+  },
+  filename: function (req, file, cb) {
+      cb(null, file.originalname);
+  }
+});
+
+const userUpload = multer({ storage: websiteStorage });
+
+app.post('/upload/:username', userUpload.array('files'), async (req, res) => {
+  if (req.session.token && handleAuth(req)) {
+      if (req.params.username === req.session.username) {
+          // File uploaded successfully
+          res.redirect(`/files/${req.session.username}`);
+      } else {
+          res.status(403).send('You do not have permission to upload files to this folder.');
+      }
+  } else {
+      res.send('invalid token');
+  }
+});
+
+// Delete route
+app.get('/delete/:username/:filename', async (req, res) => {
+  if (req.session.token && handleAuth(req)) {
+      if (req.params.username === req.session.username) {
+          const fileUser = req.params.username;
+          const filename = req.params.filename;
+          const filePath = path.join(`G:/website/${fileUser}`, filename);
+
+          try {
+              await fsp.unlink(filePath);
+              res.redirect(`/files/${req.session.username}`);
+          } catch (error) {
+              res.status(500).send('Error deleting file.');
+          }
+      } else {
+          res.status(403).send('You do not have permission to delete files from this folder.');
+      }
+  } else {
+      res.send('invalid token');
+  }
+});
+
+// Upload route with multiple file support and storage check
+app.post('/upload/:username', userUpload.array('files'), async (req, res) => {
+  if (req.session.token && handleAuth(req)) {
+      if (req.params.username === req.session.username) {
+          const fileUser = req.params.username;
+          const directoryPath = `G:/website/${fileUser}`;
+          const storageUsedGB = await getUserStorageUsage(directoryPath);
+          const storageLimitGB = 20; // 20 GB storage limit
+          let totalUploadSizeGB = 0;
+
+          // Calculate the total upload size in GB
+          req.files.forEach(file => {
+              totalUploadSizeGB += file.size / (1024 * 1024 * 1024);
+          });
+
+          if (storageUsedGB + totalUploadSizeGB <= storageLimitGB) {
+              // Total file size is within the limit, proceed with upload
+              res.redirect(`/files/${req.session.username}`);
+          } else {
+              // Total file size exceeds the limit, do not upload and inform the user
+              res.status(400).send('Total file size exceeds the available storage space.');
+          }
+      } else {
+          res.status(403).send('You do not have permission to upload files to this folder.');
+      }
+  } else {
+      res.send('invalid token');
+  }
+});
+
+
+
+app.get('/files/:username', async (req, res) => {
+  if (req.session.token) {
+      if(handleAuth(req)) {
+          const fileUser = req.params.username;
+          const directoryPath = `G:/website/${fileUser}`;
+          const items = await fsp.readdir(directoryPath);
+
+          const storageUsedGB = await getUserStorageUsage(directoryPath);
+          const storageLimitGB = 20; // 20 GB storage limit
+          const storageLeftGB = storageLimitGB - storageUsedGB;
+
+          const itemsLinks = (await Promise.all(items.map(async (item) => {
+              const itemPath = path.join(directoryPath, item);
+              const isDirectory = (await fsp.stat(itemPath)).isDirectory();
+              if (!isDirectory) {
+                  // Add a preview link for images and text files
+                  const fileExtension = path.extname(item).toLowerCase();
+                  const previewableFileTypes = ['.png', '.jpg', '.jpeg', '.gif', '.txt', '.mp4', '.mp3', '.wav' ];
+                  const previewLink = previewableFileTypes.includes(fileExtension) ? `<a href="/files/${fileUser}/preview//${item}" target="_blank">Preview</a>` : '';
+                  return `<a href="/download/${fileUser}/${item}">${item}</a>${req.session.username == fileUser ? ` <a href="/delete/${fileUser}/${item}">Delete</a>` : ''} ${previewLink}<br>`;
+              } else {
+                  return `<a href="/files/${fileUser}/${item}">${item}</a><br>`;
+              }
+          }))).join('');
+
+          let controls = '';
+          if(req.session.username == fileUser) {
+              controls = `
+              <form action="/upload/${fileUser}" method="post" enctype="multipart/form-data">
+                  <input type="file" name="files" multiple />
+                  <button type="submit">Upload</button>
+              </form>
+              `;
+          }
+
+          res.render('userFolder', {
+              username: req.session.username,
+              storageInfo: `Used: ${storageUsedGB.toFixed(2)} GB / Available: ${storageLeftGB.toFixed(2)} GB`,
+              navbar: `
+                  <li class="nav-item">
+                      <a class="nav-link" aria-current="page" href="/">Home</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/radio">Radio</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/files">Files</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/profile/${req.session.username}">Profile</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/logout">Logout</a>
+                  </li>
+              `,
+              foldersAndFiles: itemsLinks,
+              controls: controls,
+              totalSize: `You have ${storageLeftGB.toFixed(2)} GB out of ${storageLimitGB} GB`
+          });
+      } else {
+          res.send('invalid token');
+      }
+  } else {
+      res.redirect('/');
+  }
+});
+
+app.get('/files/:username/preview/:filename', async (req, res) => {
+  const fileUser = req.params.username;
+  const filename = req.params.filename;
+  const filePath = path.join(`G:/website/${fileUser}`, filename);
+
+  try {
+      // Serve the file directly for the browser to display
+      res.sendFile(filePath);
+  } catch (error) {
+      res.status(500).send('Error previewing file.');
+  }
+});
+
+//other stuff
 async function getProfile(username) {
   const client = await pool.connect();
   const resultUser = await client.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -183,8 +445,8 @@ const validateFile = async (req, res, next) => {
     return res.status(409).send({ message: 'Provide a valid extension [.jpg, .jpeg, .png, .gif.]' });
   }
   const dir = `C:/Server/nodeJSweb/public/files/user/${req.session.username}`
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+  if (!fsp.existsSync(dir)) {
+    fsp.mkdirSync(dir);
     console.log(`Created directory: ${dir}`);
   } else {
     console.log(`Directory already exists: ${dir}`);
@@ -429,7 +691,7 @@ async function handleLogin(req, res) {
         salt = salt.rows[0];
         salt = salt["salt"]
         if (!salt) {
-          message = "Where salt waltuh?"
+          message = "Where salt saltuh?"
           client.release(); // Release the client back to the pool
           res.render('login', {messages: message});
         }
@@ -781,7 +1043,7 @@ app.get('/radio/music', async (req, res) => {
       var maxPages = (queryDataLength.rows[0]["max"]) / 6;
       if (filter == undefined) {
         filterQuery = `&f=id`
-        queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} OFFSET ${offset}`);
+        queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} offset ${offset}`);
       } else {
         if (filter == 'album') {
           console.log('Album filter')
@@ -791,11 +1053,11 @@ app.get('/radio/music', async (req, res) => {
         else if (filter == 'id') {
           console.log('Id filter')
           console.log(offset)
-          queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} OFFSET ${offset}`);
+          queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} offset ${offset}`);
         }
         else {
           console.log('what?')
-          queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} OFFSET ${offset}`);
+          queryData1 = await radioSql.query(`SELECT * FROM music ORDER BY id ASC LIMIT ${pageSize} offset ${offset}`);
         }
         filterQuery = `&f=${filter}`
       }     
@@ -1081,7 +1343,7 @@ async function serverButtonRandom() {
     { command: 'execute at @r run summon phantom ~ ~ ~ {Size:5}', weight: 5 },
     { command: 'execute at @r run summon cod ~ ~ ~ {NoAI:1b}', weight: 15 },
     { command: 'execute at @r run summon salmon ~ ~ ~ {NoAI:1b}', weight: 15 },
-    { command: 'execute at @r run summon pufferfish ~ ~ ~ {NoAI:1b,PuffState:2}', weight: 15 },
+    { command: 'execute at @r run summon pufferfish ~ ~ ~ {NoAI:1b,Puffsptate:2}', weight: 15 },
     { command: 'execute at @r run summon tropical_fish ~ ~ ~ {NoAI:1b,Variant:12345678}', weight: 15 },
     { command: 'execute at @r run summon drowned ~ ~ ~', weight: 5 },
     { command: 'execute at @r run summon husk ~ ~ ~', weight: 5 },

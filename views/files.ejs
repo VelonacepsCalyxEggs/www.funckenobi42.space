@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="description" content="The files page.">
+    <script src="http://www.funckenobi42.space/scripts/bundle.js"></script>
+    <title>Files</title>
+    <%- include('partials/header') %>
+  </head>
+
+  <body style="flex-direction: column; height: 100%;">
+    <%- include('partials/navbar') %>
+    <div class="row" style="width: 100%; height: 100%;">
+      <div class="col-2 p-3"></div>
+      <div class="col-8 p-3" style="display: flex; flex: 1; flex-direction: column; overflow: scroll;">
+            <div class="container-fluid text-wrap" style="display: flex; width: 64rem; height: 12rem; font-size: 3em; text-align: left; text-justify: auto; flex-direction: column;">
+              <p class="text" style="font-size: 0.75rem;">//Yes, this might be borked.</p>
+              <p class="text" style="font-size: 0.75rem;">//Yes, you can create a million accounts and shit all over my disk, but that will just force me to disable this, and make a workaround.</p>
+              <p class="text" style="font-size: 0.75rem;">//You MIGHT be able to upload a virus that will infect my pc, not sure, highly unlikely though.</p>
+              <p class="text" style="font-size: 0.75rem;">//Please don't upload anything illigal, or NSFW, or I will be forced to take action.</p>
+              <p class="text" style="font-size: 0.75rem;">//Everything is subject to change.</p>
+              <%- folders %>
+            </div>
+          </main>
+      </div>
+      <div class="col-2 p-3"></div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+   
+
+
+    
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="/js/vendor/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
+</html>
+

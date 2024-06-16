@@ -14,8 +14,6 @@ def calculate_md5_large(file_path):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-
-
 def collectInitialData():
     try:
         conn = psycopg2.connect(**configus2.db_config)
@@ -24,6 +22,11 @@ def collectInitialData():
         print(f"Error connecting to the database: {e}")
         return
     cur = conn.cursor()
+
+    # Fetch all MD5 values from the database and store them in a set for quick lookup
+    cur.execute('SELECT md5 FROM music')
+    existing_md5s = {md5[0] for md5 in cur.fetchall()}
+
     check = 0
     while(check == 0):
         userInput = input("Do you want to scan the music folder? Y/N? ")
@@ -31,47 +34,48 @@ def collectInitialData():
             check = 1
             path = "F:\\Share\\Music\\" # directory where all music is located
             queueNumber = 0
-            # loop through the folder and its subfolders or someshit idk
             for root, dirs, files in os.walk(path):
-            # loop through the files in each subfolder
                 for file in files:
-                # get the file extension
                     ext = os.path.splitext(file)[1]
                     if ext == ".mp3":
                         file_path = os.path.join(root, file)   
                         audio = MP3(file_path)
-                        queueNumber = queueNumber + 1
+                        queueNumber += 1
                         print("Queue Number: " + str(queueNumber))
-                        songName = audio.get("TIT2", 'ligma')
-                        songArtist = audio.get("TPE1", 'ligma')
-                        songAlbum = audio.get("TALB", 'gigaballs')
-                        stringSongAlbum = str(songAlbum).replace(":", "").replace("/", "").replace("\\", "").replace("*", "").replace("?", "").replace("<", "").replace(">", "").replace(" ","").replace(".","").replace("'","")
-                        songGenre = audio.get("TCON", 'ligmaballs')
-                        albumCover = "/images/covers/" + str(stringSongAlbum) + "Cover.jpg"
+                        songName = audio.get("TIT2", 'Unknown Title')
+                        songArtist = audio.get("TPE1", 'Unknown Artist')
+                        songAlbum = audio.get("TALB", 'Unknown Album')
+                        songGenre = audio.get("TCON", 'Unknown Genre')
+                        albumCover = "/images/covers/" + str(songAlbum).translate(str.maketrans('', '', ':/*?"<> .\'')) + "Cover.jpg"
 
                         md5_value = calculate_md5_large(file_path)
-                        try:
-                            cur.execute('INSERT INTO music (name, author, album, genre, path_to_cover, md5, local) VALUES (%s, %s, %s, %s, %s, %s, %s)', (str(songName), str(songArtist), str(songAlbum), str(songGenre), str(albumCover), md5_value, file_path))
-                            conn.commit()
-                        except Exception as e:
-                            print(f'An error occured! \n {e}')
-                            conn.commit()
-
+                        
+                        # Check if the song's MD5 hash is in the set of existing MD5 hashes
+                        if md5_value not in existing_md5s:
+                            try:
+                                cur.execute('INSERT INTO music (name, author, album, genre, path_to_cover, md5, local) VALUES (%s, %s, %s, %s, %s, %s, %s)', (str(songName), str(songArtist), str(songAlbum), str(songGenre), str(albumCover), md5_value, file_path))
+                                conn.commit()
+                                # Add the new MD5 hash to the set
+                                existing_md5s.add(md5_value)
+                            except Exception as e:
+                                print(f'An error occurred! \n {e}')
+                                conn.rollback()
+                        else:
+                            print("Song already exists in the database:", file)
                     else:
-                        print("Ligma balls has happened with file: ", file) 
+                        print("Unsupported file format:", file) 
             
             print("Tracks in the folder: ", queueNumber)
-            cur.close()
-            conn.close()
-
         elif userInput == "N":
             print("Proceeding to next stage.")
             check = 1
         else:
             print("Please enter a valid answer...")
-            check = 0
-
+    cur.close()
+    conn.close()
     return
+
+
 
 
 
