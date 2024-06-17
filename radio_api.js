@@ -4,7 +4,6 @@ const net = require('net');
 const port = 55063;
 
 const server = net.createServer((socket) => {
-    console.log('Client connected');
 
     socket.on('data', (data) => {
         const strData = data.toString();
@@ -12,9 +11,9 @@ const server = net.createServer((socket) => {
         parentPort.postMessage(strData);
     });
 
-    socket.on('end', () => {
-        console.log('Client disconnected');
-    });
+    //socket.on('end', () => {
+
+    //});
 
     socket.on('error', (error) => {
         console.log(`Socket Error: ${error.message}`);

@@ -272,7 +272,7 @@ const getUserStorageUsage = async (directoryPath) => {
 // Set up storage engine for multer
 const websiteStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-      const fileUser = req.params.username;
+      let fileUser = req.params.username;
       if (fileUser) {
         // Sanitize the user input
         fileUser = validator.escape(fileUser);
@@ -304,12 +304,12 @@ app.post('/upload/:username', userUpload.array('files'), async (req, res) => {
 app.get('/delete/:username/:filename', async (req, res) => {
   if (req.session.token && handleAuth(req)) {
       if (req.params.username === req.session.username) {
-          const fileUser = req.params.username;
+          let fileUser = req.params.username;
           if (fileUser) {
             // Sanitize the user input
             fileUser = validator.escape(fileUser);
           }
-          const filename = req.params.filename;
+          let filename = req.params.filename;
           if (filename) {
             // Sanitize the user input
             filename = validator.escape(filename);
@@ -334,7 +334,7 @@ app.get('/delete/:username/:filename', async (req, res) => {
 app.post('/upload/:username', userUpload.array('files'), async (req, res) => {
   if (req.session.token && handleAuth(req)) {
       if (req.params.username === req.session.username) {
-          const fileUser = req.params.username;
+          let fileUser = req.params.username;
           if (fileUser) {
             // Sanitize the user input
             fileUser = validator.escape(fileUser);
@@ -369,7 +369,7 @@ app.post('/upload/:username', userUpload.array('files'), async (req, res) => {
 app.get('/files/:username', async (req, res) => {
   if (req.session.token) {
       if(handleAuth(req)) {
-          const fileUser = req.params.username;
+          let fileUser = req.params.username;
           if (fileUser) {
             // Sanitize the user input
             fileUser = validator.escape(fileUser);
@@ -438,12 +438,12 @@ app.get('/files/:username', async (req, res) => {
 });
 
 app.get('/files/:username/preview/:filename', async (req, res) => {
-  const fileUser = req.params.username;
+  let fileUser = req.params.username;
   if (fileUser) {
     // Sanitize the user input
     fileUser = validator.escape(fileUser);
   }
-  const filename = req.params.filename;
+  let filename = req.params.filename;
   if (filename) {
     // Sanitize the user input
     filename = validator.escape(filename);
