@@ -42,9 +42,14 @@ app.use(apiLimiter);
 // logging
 const logUserActivity = (req, res, next) => {
   res.on('finish', () => { // this will be called after the response is sent
-    const logEntryInitial = `Time: ${new Date().toISOString()}, Method: ${req.method}, URL: ${req.originalUrl}, Status: ${res.statusCode}, User-Agent: ${req.get('User-Agent')}`;
-    const logEntryEnd = `Username: ${req.session.username}, Status: ${req.session.emailVerified}, Hostname: ${req.hostname}, Path: ${req.path}, IP: ${req.ip}`
-    console.log(logEntryInitial + '\n' + logEntryEnd);
+    try {
+      const logEntryInitial = `Time: ${new Date().toISOString()}, Method: ${req.method}, URL: ${req.originalUrl}, Status: ${res.statusCode}, User-Agent: ${req.get('User-Agent')}`;
+      const logEntryEnd = `Username: ${req.session.username}, Status: ${req.session.emailVerified}, Hostname: ${req.hostname}, Path: ${req.path}, IP: ${req.ip}`
+      console.log(logEntryInitial + '\n' + logEntryEnd);
+    }
+    catch {
+      console.log(`Time: ${new Date().toISOString()}, An error occured while logging IP: ${req.ip}`)
+    }
   });
   next();
 }; 
@@ -374,8 +379,11 @@ app.get('/files/:username', async (req, res) => {
             // Sanitize the user input
             fileUser = validator.escape(fileUser);
           }
+          try {
           const directoryPath = `G:/website/${fileUser}`;
           const items = await fsp.readdir(directoryPath);
+          
+
 
           const storageUsedGB = await getUserStorageUsage(directoryPath);
           const storageLimitGB = 20; // 20 GB storage limit
@@ -394,6 +402,7 @@ app.get('/files/:username', async (req, res) => {
                   return `<a href="/files/${fileUser}/${item}">${item}</a><br>`;
               }
           }))).join('');
+          
 
           let controls = '';
           if(req.session.username == fileUser) {
@@ -429,6 +438,10 @@ app.get('/files/:username', async (req, res) => {
               controls: controls,
               totalSize: `You have ${storageLeftGB.toFixed(2)} GB out of ${storageLimitGB} GB`
           });
+          }
+          catch {
+            res.send('An error has occured during your bullshit attempt.')
+          }
       } else {
           res.send('invalid token');
       }
@@ -684,7 +697,8 @@ return crypto.randomBytes(20).toString('hex');
 
 // Login handler
 async function handleLogin(req, res) {
-    message = '';
+    const message = req.session.messages;
+    delete req.session.messages; // Clear the message so it doesn't persist
     if (req.method === "POST") {
         var { email, password } = req.body;
         const client = await pool.connect();
@@ -697,16 +711,9 @@ async function handleLogin(req, res) {
         salt = salt["salt"]
         }
         catch(error) {
-          console.error(error)
-          message = "Invalid email or password";
-          res.render('login', {messages: message});
+          console.log('Man with no salt.')
         }
-        if (!salt) {
-          message = "Invalid email or password";
-          client.release(); // Release the client back to the pool
-          res.render('login', {messages: message});
-        }
-        password = await hashPassword(password, salt, iterations, keylen, digest);
+
         try {
         // Query user from the database
         const resultUser = await client.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -715,14 +722,18 @@ async function handleLogin(req, res) {
         // Compare submitted password with the stored hash
         if (user) {
           if (user["confirmed"] == true) {
-            if (user["password"] === password) {
+            if (salt != undefined) {
+              password = await hashPassword(password, salt, iterations, keylen, digest);
+              if (user["password"] === password) {
+                
 
-                req.session.username = user["username"]; // Set user session
-                const token = generateToken();
-                req.session.token = token;
-                req.session.userId = user['id']
-                await client.query('UPDATE users SET token = $1 WHERE id = $2;', [token, user["id"]]);
-                return res.redirect('/'); // Redirect to user dashboard
+                  req.session.username = user["username"]; // Set user session
+                  const token = generateToken();
+                  req.session.token = token;
+                  req.session.userId = user['id']
+                  await client.query('UPDATE users SET token = $1 WHERE id = $2;', [token, user["id"]]);
+                  return res.redirect('/'); // Redirect to user dashboard
+                } else {message = "Invalid email or password"}
               } else {message = "Invalid email or password"}
             } else {message = "Please verify your account."}
           } else {message = "Invalid email or password";}
@@ -812,7 +823,8 @@ async function handleLogin(req, res) {
                     const salt = crypto.randomBytes(16).toString('hex');
                     password = await hashPassword(password, salt, iterations, keylen, digest);
                     await client.query('INSERT INTO users(username, email, password, token, salt) VALUES ($1, $2, $3, $4, $5)', [username, email, password, token, salt]);
-                    client.release()                 
+                    client.release() 
+                    req.session.messages = 'Please verify your email. Look in spam btw... I hate my bootleg smtp.';     
                     return res.redirect('/login'); // Redirect to login page
               } else {message = "There is already an account with this username."}
             } else {message = "The password must be equal or more than 8 characters long."}
