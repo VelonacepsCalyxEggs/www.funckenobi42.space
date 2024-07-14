@@ -18,7 +18,7 @@
       }
       function addToQueue(id) {
       jQuery.ajax({
-          url: `/api/addToPlaylist/${id}`, // Endpoint URL
+          url: `api/addToPlaylist/${id}`, // Endpoint URL
           method: 'GET', // Or 'POST' if you used app.post() on the server
           success: function(response) {
               console.log('Server function executed:', response);
