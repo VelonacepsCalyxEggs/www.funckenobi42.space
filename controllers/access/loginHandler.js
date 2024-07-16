@@ -36,10 +36,13 @@ exports.handleLogin = async (req, res) => {
                 
 
                   req.session.username = user["username"]; // Set user session
-                  const token = cryptographyController.generateToken();
+                  const token = await cryptographyController.generateToken();
+                  console.log(token)
                   req.session.token = token;
                   req.session.userId = user['id']
+                  console.log(user['id'])
                   await client.query('UPDATE users SET token = $1 WHERE id = $2;', [token, user["id"]]);
+                  console.log(req.session.token)
                   return res.redirect('/'); // Redirect to user dashboard
                 } else {message = "Invalid email or password"}
               } else {message = "Invalid email or password"}

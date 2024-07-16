@@ -34,10 +34,21 @@ app.use(logUserActivity)
 
 app.use(session); // Use the session middleware
 
+app.use((req, res, next) => {
+  res.locals.hostname = req.hostname;
+  next();
+});
+
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.urlencoded({ extended: true }));
 
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json());
+
+app.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // Perform cleanup and exit process if necessary
+});
+
 
 module.exports = { app, server };

@@ -14,6 +14,7 @@ const registerRoutes = require('./routes/register/register');
 const logoutRoutes = require('./routes/logout/logout');
 const radioRoutes = require('./routes/radio/radio');
 const fileRoutes = require('./routes/files/files');
+const profileRoutes = require('./routes/profile/profile');
 app.use(express.json());
 app.use('/', mainRoutes);
 app.use('/login', loginRoutes);
@@ -21,6 +22,7 @@ app.use('/register', registerRoutes);
 app.use('/logout', logoutRoutes);
 app.use('/radio', radioRoutes);
 app.use('/files', fileRoutes)
+app.use('/profile', profileRoutes)
 
 
 

@@ -3,7 +3,9 @@ const path = require('path');
 const validator = require('validator');
 const fs = require('fs'); // For createReadStream
 const fsp = require('fs').promises; // For promise-based operations
-
+const { Pool } = require('pg');
+const dbConfig = require('../../config/config'); // Adjust the path to your database connection
+const pool = new Pool(dbConfig); // Use the configuration to create the pool
 const websiteStorage = multer.diskStorage({
   destination: function (req, file, cb) {
       let fileUser = req.params.username;
@@ -16,6 +18,28 @@ const websiteStorage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
       cb(null, file.originalname);
+  }
+});
+
+const musicStorage = multer.diskStorage({
+  destination: async function (req, file, cb) {
+    let fileUser = req.session.username;
+    let albumName = req.albumName; // Get the album name from the request object
+
+    if (fileUser) {
+      fileUser = validator.escape(fileUser);
+    }
+    if (albumName) {
+      albumName = validator.escape(albumName);
+    }
+    
+    const directoryPath = `F:/Share/Music/${fileUser}/`;
+    await fsp.mkdir(directoryPath, { recursive: true }); // No callback needed here
+    console.log(`Folder created for user ${fileUser}: ${directoryPath}`);
+    cb(null, directoryPath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
   }
 });
 
@@ -58,5 +82,6 @@ const upload = multer({
 }).single('avatar')
 
 const userUpload = multer({ storage: websiteStorage });
+const userMusicUpload = multer({ storage: musicStorage });
 
-module.exports = { userUpload, upload };
+module.exports = { userUpload, upload, userMusicUpload };

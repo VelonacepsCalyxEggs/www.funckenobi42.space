@@ -41,3 +41,12 @@ exports.getUserStorageUsage = async (directoryPath) => {
     return totalSizeGB;
 };
 
+exports.readMetadata = async (filePath) => {
+  try {
+    const mm = await import('music-metadata');
+    const metadata = await mm.parseFile(filePath);
+    console.log(metadata);
+  } catch (error) {
+    console.error(error.message);
+  }
+}
